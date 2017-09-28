@@ -32,7 +32,10 @@ $STELLARPOPMODELS_DIR=‘${FF_DIR}/stellar_population_models/'
 
 ## Content 
 
-** bin ** Example scripts to run Firefly using certain sets of data and using high performance computing facilities.
-** data ** Example input and output data that are used in the tutorials in 'doc'.
-** doc ** Documentation and detailed examples to help understanding how to run Firefly and read it's output.
-** python ** The Firefly code.
+**bin** Example scripts to run Firefly using certain sets of data and using high performance computing facilities.
+
+**data** Example input and output data that are used in the tutorials in 'doc'.
+
+**doc** Documentation and detailed examples to help understanding how to run Firefly and read it's output.
+
+**python** The Firefly code.
