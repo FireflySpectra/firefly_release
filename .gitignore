@@ -7,3 +7,4 @@
 doc/.ipynb_checkpoints/
 jobs/
 output/
+.nfs*
