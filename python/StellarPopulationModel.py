@@ -44,6 +44,13 @@ default_value = -9999
 EPS = 10.E-10
 dict_imfs = {'cha': 'Chabrier', 'ss': 'Salpeter', 'kr': 'Kroupa'}
 
+def trylog10(value):
+	if (value<EPS):
+		logv = default_value
+	else:
+		logv = np.log10(value)
+	return logv
+
 class StellarPopulationModel:
 	"""
 	:param specObs: specObs observed spectrum object initiated with the  GalaxySpectrumFIREFLY class.
@@ -237,7 +244,7 @@ class StellarPopulationModel:
 #				print(age_data)
 #				stop
 				for a in age_data:
-					logyrs_a = np.log10(a)+9.0
+					logyrs_a = trylog10(a)+9.0
 					## print "age model selection:", self.age_limits[0], logyrs_a, self.age_limits[1]
 					if (((10**(logyrs_a-9)) < self.age_limits[0]) or ((10**(logyrs_a-9)) > self.age_limits[1])):
 						continue
@@ -313,7 +320,7 @@ class StellarPopulationModel:
 				model_table = pd.read_table(z,converters={'Age':np.float64}, header=None ,usecols=[0,2,3], names=['Age','wavelength_model','flux_model'], delim_whitespace=True)
 				age_data = np.unique(model_table['Age'].values.ravel())
 				for a in age_data:
-					logyrs_a = np.log10(a)+9.0
+					logyrs_a = trylog10(a)+9.0
 					## print "age model selection:", self.age_limits[0], logyrs_a, self.age_limits[1]
 					if (((10**(logyrs_a-9)) < self.age_limits[0]) or ((10**(logyrs_a-9)) > self.age_limits[1])):
 						continue
@@ -526,7 +533,7 @@ class StellarPopulationModel:
 			best_fitCol = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit)
 			cols = pyfits.ColDefs([ waveCol, dataCol, errorCol, best_fitCol])
 			tbhdu = pyfits.BinTableHDU.from_columns(cols)
-			#tbhdu.header['HIERARCH age_universe (Gyr)'] = np.log10(self.cosmo.age(self.specObs.redshift).value*10**9)
+			#tbhdu.header['HIERARCH age_universe (Gyr)'] = trylog10(self.cosmo.age(self.specObs.redshift).value*10**9)
 			tbhdu.header['HIERARCH redshift'] = self.specObs.redshift
 			tbhdu.header['HIERARCH Age_unit'] = 'log (age/Gyr)'
 			tbhdu.header['HIERARCH Metallicity_unit'] = '[Z/H]'
@@ -535,92 +542,62 @@ class StellarPopulationModel:
 			tbhdu.header['IMF'] = dict_imfs[self.imfs[0]]
 			tbhdu.header['Model'] = self.model_libs[0]
 			tbhdu.header['HIERARCH converged'] = 'True'
-			tbhdu.header['HIERARCH age_lightW'] = np.log10(averages['light_age'])
-			tbhdu.header['HIERARCH age_lightW_up_1sig'] = np.log10(averages['light_age_1_sig_plus'])
-			tbhdu.header['HIERARCH age_lightW_low_1sig'] = np.log10(averages['light_age_1_sig_minus'])
-                        tbhdu.header['HIERARCH age_lightW_up_2sig'] = np.log10(averages['light_age_2_sig_plus'])
-                        tbhdu.header['HIERARCH age_lightW_low_2sig'] = np.log10(averages['light_age_2_sig_minus'])
-                        tbhdu.header['HIERARCH age_lightW_up_3sig'] = np.log10(averages['light_age_3_sig_plus'])
-                        tbhdu.header['HIERARCH age_lightW_low_3sig'] = np.log10(averages['light_age_3_sig_minus'])
-			tbhdu.header['HIERARCH metallicity_lightW'] = np.log10(averages['light_metal'])
-			tbhdu.header['HIERARCH metallicity_lightW_up_1sig'] = np.log10(averages['light_metal_1_sig_plus'])
-			tbhdu.header['HIERARCH metallicity_lightW_low_1sig'] = np.log10(averages['light_metal_1_sig_minus'])
-                        tbhdu.header['HIERARCH metallicity_lightW_up_2sig'] = np.log10(averages['light_metal_2_sig_plus'])
-                        tbhdu.header['HIERARCH metallicity_lightW_low_2sig'] = np.log10(averages['light_metal_2_sig_minus'])
-                        tbhdu.header['HIERARCH metallicity_lightW_up_3sig'] = np.log10(averages['light_metal_3_sig_plus'])
-                        tbhdu.header['HIERARCH metallicity_lightW_low_3sig'] = np.log10(averages['light_metal_3_sig_minus'])
-			tbhdu.header['HIERARCH age_massW'] = np.log10(averages['mass_age'])
-			tbhdu.header['HIERARCH age_massW_up_1sig'] = np.log10(averages['mass_age_1_sig_plus'])
-			tbhdu.header['HIERARCH age_massW_low_1sig'] = np.log10(averages['mass_age_1_sig_minus'])
-                        tbhdu.header['HIERARCH age_massW_up_2sig'] = np.log10(averages['mass_age_2_sig_plus'])
-                        tbhdu.header['HIERARCH age_massW_low_2sig'] = np.log10(averages['mass_age_2_sig_minus'])
-                        tbhdu.header['HIERARCH age_massW_up_3sig'] = np.log10(averages['mass_age_3_sig_plus'])
-                        tbhdu.header['HIERARCH age_massW_low_3sig'] = np.log10(averages['mass_age_3_sig_minus'])
-			tbhdu.header['HIERARCH metallicity_massW'] = np.log10(averages['mass_metal'])
-			tbhdu.header['HIERARCH metallicity_massW_up_1sig'] = np.log10(averages['mass_metal_1_sig_plus'])
-			tbhdu.header['HIERARCH metallicity_massW_low_1sig'] = np.log10(averages['mass_metal_1_sig_minus'])
-                        tbhdu.header['HIERARCH metallicity_massW_up_2sig'] = np.log10(averages['mass_metal_2_sig_plus'])
-                        tbhdu.header['HIERARCH metallicity_massW_low_2sig'] = np.log10(averages['mass_metal_2_sig_minus'])
-                        tbhdu.header['HIERARCH metallicity_massW_up_3sig'] = np.log10(averages['mass_metal_3_sig_plus'])
-                        tbhdu.header['HIERARCH metallicity_massW_low_3sig'] = np.log10(averages['mass_metal_3_sig_minus'])
-			tbhdu.header['HIERARCH stellar_mass'] = np.log10(averages['stellar_mass'])
-                        tbhdu.header['HIERARCH living_stars_mass'] = np.log10(combined_ML_totM)
-                        tbhdu.header['HIERARCH remnant_mass'] = np.log10(combined_ML_alive)
-                        tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs'] = np.log10(combined_ML_wd)
-                        tbhdu.header['HIERARCH remnant_mass_in_neutronstars'] = np.log10(combined_ML_ns)
-                        tbhdu.header['HIERARCH remnant_mass_blackholes'] = np.log10(combined_ML_bh)
-                        tbhdu.header['HIERARCH mass_of_ejecta'] = np.log10(combined_gas_fraction)
-			tbhdu.header['HIERARCH stellar_mass_up_1sig'] = np.log10(averages['stellar_mass_1_sig_plus'])
-			tbhdu.header['HIERARCH stellar_mass_low_1sig'] = np.log10(averages['stellar_mass_1_sig_minus'])
-			tbhdu.header['HIERARCH stellar_mass_up_2sig'] = np.log10(averages['stellar_mass_2_sig_plus'])
-                        tbhdu.header['HIERARCH stellar_mass_low_2sig'] = np.log10(averages['stellar_mass_2_sig_minus'])
-			tbhdu.header['HIERARCH stellar_mass_up_3sig'] = np.log10(averages['stellar_mass_3_sig_plus'])
-                        tbhdu.header['HIERARCH stellar_mass_low_3sig'] = np.log10(averages['stellar_mass_3_sig_minus'])
+			tbhdu.header['HIERARCH age_lightW'] = trylog10(averages['light_age'])
+			tbhdu.header['HIERARCH age_lightW_up_1sig'] = trylog10(averages['light_age_1_sig_plus'])
+			tbhdu.header['HIERARCH age_lightW_low_1sig'] = trylog10(averages['light_age_1_sig_minus'])
+                        tbhdu.header['HIERARCH age_lightW_up_2sig'] = trylog10(averages['light_age_2_sig_plus'])
+                        tbhdu.header['HIERARCH age_lightW_low_2sig'] = trylog10(averages['light_age_2_sig_minus'])
+                        tbhdu.header['HIERARCH age_lightW_up_3sig'] = trylog10(averages['light_age_3_sig_plus'])
+                        tbhdu.header['HIERARCH age_lightW_low_3sig'] = trylog10(averages['light_age_3_sig_minus'])
+			tbhdu.header['HIERARCH metallicity_lightW'] = trylog10(averages['light_metal'])
+			tbhdu.header['HIERARCH metallicity_lightW_up_1sig'] = trylog10(averages['light_metal_1_sig_plus'])
+			tbhdu.header['HIERARCH metallicity_lightW_low_1sig'] = trylog10(averages['light_metal_1_sig_minus'])
+                        tbhdu.header['HIERARCH metallicity_lightW_up_2sig'] = trylog10(averages['light_metal_2_sig_plus'])
+                        tbhdu.header['HIERARCH metallicity_lightW_low_2sig'] = trylog10(averages['light_metal_2_sig_minus'])
+                        tbhdu.header['HIERARCH metallicity_lightW_up_3sig'] = trylog10(averages['light_metal_3_sig_plus'])
+                        tbhdu.header['HIERARCH metallicity_lightW_low_3sig'] = trylog10(averages['light_metal_3_sig_minus'])
+			tbhdu.header['HIERARCH age_massW'] = trylog10(averages['mass_age'])
+			tbhdu.header['HIERARCH age_massW_up_1sig'] = trylog10(averages['mass_age_1_sig_plus'])
+			tbhdu.header['HIERARCH age_massW_low_1sig'] = trylog10(averages['mass_age_1_sig_minus'])
+                        tbhdu.header['HIERARCH age_massW_up_2sig'] = trylog10(averages['mass_age_2_sig_plus'])
+                        tbhdu.header['HIERARCH age_massW_low_2sig'] = trylog10(averages['mass_age_2_sig_minus'])
+                        tbhdu.header['HIERARCH age_massW_up_3sig'] = trylog10(averages['mass_age_3_sig_plus'])
+                        tbhdu.header['HIERARCH age_massW_low_3sig'] = trylog10(averages['mass_age_3_sig_minus'])
+			tbhdu.header['HIERARCH metallicity_massW'] = trylog10(averages['mass_metal'])
+			tbhdu.header['HIERARCH metallicity_massW_up_1sig'] = trylog10(averages['mass_metal_1_sig_plus'])
+			tbhdu.header['HIERARCH metallicity_massW_low_1sig'] = trylog10(averages['mass_metal_1_sig_minus'])
+                        tbhdu.header['HIERARCH metallicity_massW_up_2sig'] = trylog10(averages['mass_metal_2_sig_plus'])
+                        tbhdu.header['HIERARCH metallicity_massW_low_2sig'] = trylog10(averages['mass_metal_2_sig_minus'])
+                        tbhdu.header['HIERARCH metallicity_massW_up_3sig'] = trylog10(averages['mass_metal_3_sig_plus'])
+                        tbhdu.header['HIERARCH metallicity_massW_low_3sig'] = trylog10(averages['mass_metal_3_sig_minus'])
+			tbhdu.header['HIERARCH stellar_mass'] = trylog10(averages['stellar_mass'])
+                        tbhdu.header['HIERARCH living_stars_mass'] = trylog10(combined_ML_totM)
+                        tbhdu.header['HIERARCH remnant_mass'] = trylog10(combined_ML_alive)
+                        tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs'] = trylog10(combined_ML_wd)
+                        tbhdu.header['HIERARCH remnant_mass_in_neutronstars'] = trylog10(combined_ML_ns)
+                        tbhdu.header['HIERARCH remnant_mass_blackholes'] = trylog10(combined_ML_bh)
+                        tbhdu.header['HIERARCH mass_of_ejecta'] = trylog10(combined_gas_fraction)
+			tbhdu.header['HIERARCH stellar_mass_up_1sig'] = trylog10(averages['stellar_mass_1_sig_plus'])
+			tbhdu.header['HIERARCH stellar_mass_low_1sig'] = trylog10(averages['stellar_mass_1_sig_minus'])
+			tbhdu.header['HIERARCH stellar_mass_up_2sig'] = trylog10(averages['stellar_mass_2_sig_plus'])
+                        tbhdu.header['HIERARCH stellar_mass_low_2sig'] = trylog10(averages['stellar_mass_2_sig_minus'])
+			tbhdu.header['HIERARCH stellar_mass_up_3sig'] = trylog10(averages['stellar_mass_3_sig_plus'])
+                        tbhdu.header['HIERARCH stellar_mass_low_3sig'] = trylog10(averages['stellar_mass_3_sig_minus'])
 			tbhdu.header['HIERARCH EBV'] = best_ebv
 			tbhdu.header['HIERARCH ssp_number'] =len(order)
 
 			# quantities per SSP
 			for iii in range(len(order)):
-				tbhdu.header['HIERARCH stellar_mass_ssp_'+str(iii)] = default_value
-				if (mass_per_ssp[order][iii]>EPS):
-					tbhdu.header['HIERARCH stellar_mass_ssp_'+str(iii)] = np.log10(mass_per_ssp[order][iii])
-
-				tbhdu.header['HIERARCH living_stars_mass_ssp_'+str(iii)] = default_value
-				if(final_ML_totM[order][iii]>EPS):
-					tbhdu.header['HIERARCH living_stars_mass_ssp_'+str(iii)] = np.log10(final_ML_totM[order][iii])
-
-				tbhdu.header['HIERARCH remnant_mass_ssp_'+str(iii)] = default_value
-				if(final_ML_alive[order][iii]>EPS):
-					tbhdu.header['HIERARCH remnant_mass_ssp_'+str(iii)] = np.log10(final_ML_alive[order][iii])
-
-				tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs_ssp_'+str(iii)] = default_value
-				if(final_ML_alive[order][iii]>EPS):
-					tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs_ssp_'+str(iii)] = np.log10(final_ML_wd[order][iii])
-
-				tbhdu.header['HIERARCH remnant_mass_in_neutronstars_ssp_'+str(iii)] = default_value
-				if(final_ML_ns[order][iii]>EPS):
-					tbhdu.header['HIERARCH remnant_mass_in_neutronstars_ssp_'+str(iii)] = np.log10(final_ML_ns[order][iii])
-
-				tbhdu.header['HIERARCH remnant_mass_in_blackholes_ssp_'+str(iii)] = default_value
-				if (final_ML_bh[order][iii]>EPS):
-					tbhdu.header['HIERARCH remnant_mass_in_blackholes_ssp_'+str(iii)] = np.log10(final_ML_bh[order][iii])
-
-				tbhdu.header['HIERARCH mass_of_ejecta_ssp_'+str(iii)] =  default_value
-				if ((mass_per_ssp[order][iii] - final_ML_totM[order][iii])>EPS):
-					tbhdu.header['HIERARCH mass_of_ejecta_ssp_'+str(iii)] = np.log10(mass_per_ssp[order][iii] - final_ML_totM[order][iii])
-
-				tbhdu.header['HIERARCH log_age_ssp_'+str(iii)] = default_value
-				if (age_per_ssp[order][iii]>EPS):
-					tbhdu.header['HIERARCH log_age_ssp_'+str(iii)] = np.log10(age_per_ssp[order][iii])
-
-				tbhdu.header['HIERARCH metal_ssp_'+str(iii)] = default_value
-				if (metal_per_ssp[order][iii]>EPS):
-					tbhdu.header['HIERARCH metal_ssp_'+str(iii)] = np.log10(metal_per_ssp[order][iii])
-
-				tbhdu.header['HIERARCH SFR_ssp_'+str(iii)] = default_value
-				if (mass_per_ssp[order][iii]/age_per_ssp[order][iii] >EPS):
-					tbhdu.header['HIERARCH SFR_ssp_'+str(iii)] = np.log10(mass_per_ssp[order][iii]/age_per_ssp[order][iii])	
-
+				tbhdu.header['HIERARCH stellar_mass_ssp_'+str(iii)] = trylog10(mass_per_ssp[order][iii])
+				tbhdu.header['HIERARCH living_stars_mass_ssp_'+str(iii)] = trylog10(final_ML_totM[order][iii])
+				tbhdu.header['HIERARCH remnant_mass_ssp_'+str(iii)] = trylog10(final_ML_alive[order][iii])
+				tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs_ssp_'+str(iii)] = trylog10(final_ML_wd[order][iii])
+				tbhdu.header['HIERARCH remnant_mass_in_neutronstars_ssp_'+str(iii)] = trylog10(final_ML_ns[order][iii])
+				tbhdu.header['HIERARCH remnant_mass_in_blackholes_ssp_'+str(iii)] = trylog10(final_ML_bh[order][iii])
+				tbhdu.header['HIERARCH mass_of_ejecta_ssp_'+str(iii)] = trylog10(mass_per_ssp[order][iii] - final_ML_totM[order][iii])
+				tbhdu.header['HIERARCH log_age_ssp_'+str(iii)] = trylog10(age_per_ssp[order][iii])
+				tbhdu.header['HIERARCH metal_ssp_'+str(iii)] = trylog10(metal_per_ssp[order][iii])
+				tbhdu.header['HIERARCH SFR_ssp_'+str(iii)] = trylog10(mass_per_ssp[order][iii]/age_per_ssp[order][iii])	
 				tbhdu.header['HIERARCH weightMass_ssp_'+str(iii)] = weight_mass_per_ssp[order][iii]
 				tbhdu.header['HIERARCH weightLight_ssp_'+str(iii)] = weight_light_per_ssp[order][iii]
 
