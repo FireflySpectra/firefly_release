@@ -10,3 +10,5 @@ Here we provide some examples on how to run Firefly and how to read the fits to 
 
 **run_firefly_hpc.ipynb** This notebooks describes how to use the scripts available in ../bin/SDSS/ to do several Firefly runs in an HPC facility such as [Sciama](http://www.sciama.icg.port.ac.uk/).
 
+**example_data** This folder contains one Firefly output example and 3 SDSS spectra to run Firefly over.
+
