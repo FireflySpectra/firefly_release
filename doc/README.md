@@ -12,3 +12,5 @@ Here we provide some examples on how to run Firefly and how to read the fits to 
 
 **example_data** This folder contains one Firefly output example and 3 SDSS spectra to run Firefly over.
 
+**SDSSinHPC** This directory contains a script to write and submit jobs to an HPC facility using qsub commands, that call the 'run_stellarpop.py' code.
+
