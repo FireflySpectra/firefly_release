@@ -1,5 +1,5 @@
 # This script can be run alone using the example spectra:
-#> python one_spectra.py '../../doc/example_data/spectra/0266/spec-0266-51602-0573.fits'
+#> python one_spectra.py '../../doc/example_data/spectra/0266/spec-0266-51630-0623.fits'
 import numpy as np
 import sys, os
 from os.path import join
@@ -137,7 +137,7 @@ def runSpec(specLiteFile):
 			
 
 		try :
-			model_9 = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, model_libs = ['STELIB'], imfs = ['kr'], age_limits = [ageMin,ageMax], downgrade_models = True, data_wave_medium = 'vacuum', Z_limits = [ZMin,ZMax], use_downgraded_models = True, write_results = False)
+			model_9 = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, model_libs = ['STELIB'], imfs = ['kr'], age_limits = [ageMin,ageMax], downgrade_models = False, data_wave_medium = 'vacuum', Z_limits = [ZMin,ZMax], use_downgraded_models = True, write_results = False)
 			model_9.fit_models_to_data()
 			tables.append( model_9.tbhdu )
 			# print "m6", time.time()-t0

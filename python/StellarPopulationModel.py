@@ -41,6 +41,7 @@ from firefly_library import airtovac, convert_chis_to_probs, light_weights_to_ma
 import matplotlib.pyplot as plt
 
 default_value = -9999
+EPS = 10.E-10
 dict_imfs = {'cha': 'Chabrier', 'ss': 'Salpeter', 'kr': 'Kroupa'}
 
 class StellarPopulationModel:
@@ -580,44 +581,44 @@ class StellarPopulationModel:
 
 			# quantities per SSP
 			for iii in range(len(order)):
-				tbhdu.header['HIERARCH stellar_mass_ssp_'+str(iii)] = -999.
-				if (mass_per_ssp[order][iii]>0.):
+				tbhdu.header['HIERARCH stellar_mass_ssp_'+str(iii)] = default_value
+				if (mass_per_ssp[order][iii]>EPS):
 					tbhdu.header['HIERARCH stellar_mass_ssp_'+str(iii)] = np.log10(mass_per_ssp[order][iii])
 
-				tbhdu.header['HIERARCH living_stars_mass_ssp_'+str(iii)] = -999.
-				if(final_ML_totM[order][iii]>0.):
+				tbhdu.header['HIERARCH living_stars_mass_ssp_'+str(iii)] = default_value
+				if(final_ML_totM[order][iii]>EPS):
 					tbhdu.header['HIERARCH living_stars_mass_ssp_'+str(iii)] = np.log10(final_ML_totM[order][iii])
 
-				tbhdu.header['HIERARCH remnant_mass_ssp_'+str(iii)] = -999.
-				if(final_ML_alive[order][iii]>0.):
+				tbhdu.header['HIERARCH remnant_mass_ssp_'+str(iii)] = default_value
+				if(final_ML_alive[order][iii]>EPS):
 					tbhdu.header['HIERARCH remnant_mass_ssp_'+str(iii)] = np.log10(final_ML_alive[order][iii])
 
-				tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs_ssp_'+str(iii)] = -999.
-				if(final_ML_alive[order][iii]>0.):
+				tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs_ssp_'+str(iii)] = default_value
+				if(final_ML_alive[order][iii]>EPS):
 					tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs_ssp_'+str(iii)] = np.log10(final_ML_wd[order][iii])
 
-				tbhdu.header['HIERARCH remnant_mass_in_neutronstars_ssp_'+str(iii)] = -999.
-				if(final_ML_ns[order][iii]>0.):
+				tbhdu.header['HIERARCH remnant_mass_in_neutronstars_ssp_'+str(iii)] = default_value
+				if(final_ML_ns[order][iii]>EPS):
 					tbhdu.header['HIERARCH remnant_mass_in_neutronstars_ssp_'+str(iii)] = np.log10(final_ML_ns[order][iii])
 
-				tbhdu.header['HIERARCH remnant_mass_in_blackholes_ssp_'+str(iii)] = -999.
-				if (final_ML_bh[order][iii]>0.):
+				tbhdu.header['HIERARCH remnant_mass_in_blackholes_ssp_'+str(iii)] = default_value
+				if (final_ML_bh[order][iii]>EPS):
 					tbhdu.header['HIERARCH remnant_mass_in_blackholes_ssp_'+str(iii)] = np.log10(final_ML_bh[order][iii])
 
-				tbhdu.header['HIERARCH mass_of_ejecta_ssp_'+str(iii)] =  -999.
-				if ((mass_per_ssp[order][iii] - final_ML_totM[order][iii])>0.):
+				tbhdu.header['HIERARCH mass_of_ejecta_ssp_'+str(iii)] =  default_value
+				if ((mass_per_ssp[order][iii] - final_ML_totM[order][iii])>EPS):
 					tbhdu.header['HIERARCH mass_of_ejecta_ssp_'+str(iii)] = np.log10(mass_per_ssp[order][iii] - final_ML_totM[order][iii])
 
-				tbhdu.header['HIERARCH log_age_ssp_'+str(iii)] = -999.
-				if (age_per_ssp[order][iii]>0.):
+				tbhdu.header['HIERARCH log_age_ssp_'+str(iii)] = default_value
+				if (age_per_ssp[order][iii]>EPS):
 					tbhdu.header['HIERARCH log_age_ssp_'+str(iii)] = np.log10(age_per_ssp[order][iii])
 
-				tbhdu.header['HIERARCH metal_ssp_'+str(iii)] = -999.
-				if (metal_per_ssp[order][iii]>0.):
+				tbhdu.header['HIERARCH metal_ssp_'+str(iii)] = default_value
+				if (metal_per_ssp[order][iii]>EPS):
 					tbhdu.header['HIERARCH metal_ssp_'+str(iii)] = np.log10(metal_per_ssp[order][iii])
 
-				tbhdu.header['HIERARCH SFR_ssp_'+str(iii)] = -999.
-				if (mass_per_ssp[order][iii]/age_per_ssp[order][iii] >0.):
+				tbhdu.header['HIERARCH SFR_ssp_'+str(iii)] = default_value
+				if (mass_per_ssp[order][iii]/age_per_ssp[order][iii] >EPS):
 					tbhdu.header['HIERARCH SFR_ssp_'+str(iii)] = np.log10(mass_per_ssp[order][iii]/age_per_ssp[order][iii])	
 
 				tbhdu.header['HIERARCH weightMass_ssp_'+str(iii)] = weight_mass_per_ssp[order][iii]
