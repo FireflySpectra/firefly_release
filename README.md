@@ -6,6 +6,8 @@ The code can fit a wide range of stellar population models and galaxy spectra. A
 
 The full documentation of the Python code generated with Sphynx can be found [here.](http://www.mpe.mpg.de/~comparat/firefly_doc/)
 
+The Stellar Population Models can be found in the [SDSS Data Base](https://svn.sdss.org/public/data/sdss/stellarpopmodels/tags/v1_0_1/data/).
+
 ## Installation
 
 Requirements: python 2.7.8 and its main packages all installable through pip: numpy, scipy, matplotlib, math ...
@@ -27,7 +29,7 @@ Once you have downloaded and unpacked the code you need to set some environmenta
 ```
 $FF_DIR='[your path to Firefly]/firefly_code'
 $PYTHONPATH=‘${FF_DIR}/python:$PYTHONPATH’
-$STELLARPOPMODELS_DIR=‘${FF_DIR}/stellar_population_models/'
+$STELLARPOPMODELS_DIR=‘[your path to the stellar_population models]/stellar_population_models/'
 ```
 
 ## Content 

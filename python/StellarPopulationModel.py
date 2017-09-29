@@ -175,14 +175,14 @@ class StellarPopulationModel:
 			#stop
 			if self.use_downgraded_models :
 				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES_downgraded','ssp_M11_' + model_used+ '.' + imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_MILES_downgraded','ssp_M11_' + model_used+ '.' + imf_used)
 				else:
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+ model_used + '_downgraded', 'ssp_M11_' +model_used +'.' + imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_'+ model_used + '_downgraded', 'ssp_M11_' +model_used +'.' + imf_used)
 			else:
 				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES', 'ssp_M11_'+model_used+'.'+imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_MILES', 'ssp_M11_'+model_used+'.'+imf_used)
 				else:
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+model_used ,'ssp_M11_' +model_used +'.' + imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_'+model_used ,'ssp_M11_' +model_used +'.' + imf_used)
 
 
 			# Constructs the metallicity array of models :
@@ -277,9 +277,9 @@ class StellarPopulationModel:
 			first_file  = True
 			model_files = []
 			if self.use_downgraded_models:
-				model_path = join(os.environ['STELLARPOPMODELS_DIR'], 'UVmodels_Marastonetal08b_downgraded')
+				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'data','UVmodels_Marastonetal08b_downgraded')
 			else:
-				model_path = join(os.environ['STELLARPOPMODELS_DIR'], 'UVmodels_Marastonetal08b')
+				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'data','UVmodels_Marastonetal08b')
 			# Gathers the list of models with metallicities and ages of interest:
 			all_metal_files = glob.glob(model_path+'*')
 			metal_files 	= []
@@ -464,7 +464,7 @@ class StellarPopulationModel:
 	
 			# Gets the mass loss factors.
 			if dict_imfs[self.imfs[0]] == 'Salpeter':
-				ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'], 'massloss_salpeter.txt'), unpack=True, skiprows=2)
+				ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data','massloss_salpeter.txt'), unpack=True, skiprows=2)
                                 # First build the grids of the quantities. Make sure they are in linear units.                  
                                 estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
                                 estimate_ML_ns, estimate_ML_bh, estimate_ML_turnoff = estimation(10**ML_metallicity, ML_age, ML_ns), estimation(10**ML_metallicity, ML_age, ML_bh), estimation(10**ML_metallicity, ML_age, ML_turnoff)
@@ -487,7 +487,7 @@ class StellarPopulationModel:
                                 final_ML_totM, final_ML_alive, final_ML_wd, final_ML_ns, final_ML_bh, final_ML_turnoff, final_gas_fraction= np.array(final_ML_totM), np.array(final_ML_alive), np.array(final_ML_wd), np.array(final_ML_ns), np.array(final_ML_bh), np.array(final_ML_turnoff), np.array(final_gas_fraction)
 
 			if ((dict_imfs[self.imfs[0]] == 'Kroupa') or (dict_imfs[self.imfs[0]] == 'Chabrier')):
-				ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'massloss_kroupa.txt'), unpack=True, skiprows=2)
+				ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data','massloss_kroupa.txt'), unpack=True, skiprows=2)
 				# First build the grids of the quantities. Make sure they are in linear units.			
 				estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
 				estimate_ML_ns, estimate_ML_bh, estimate_ML_turnoff = estimation(10**ML_metallicity, ML_age, ML_ns), estimation(10**ML_metallicity, ML_age, ML_bh), estimation(10**ML_metallicity, ML_age, ML_turnoff)
@@ -601,7 +601,7 @@ class StellarPopulationModel:
 					tbhdu.header['HIERARCH remnant_mass_in_neutronstars_ssp_'+str(iii)] = np.log10(final_ML_ns[order][iii])
 
 				tbhdu.header['HIERARCH remnant_mass_in_blackholes_ssp_'+str(iii)] = -999.
-				if (final_ML_bh[order][iii])>0.):
+				if (final_ML_bh[order][iii]>0.):
 					tbhdu.header['HIERARCH remnant_mass_in_blackholes_ssp_'+str(iii)] = np.log10(final_ML_bh[order][iii])
 
 				tbhdu.header['HIERARCH mass_of_ejecta_ssp_'+str(iii)] =  -999.

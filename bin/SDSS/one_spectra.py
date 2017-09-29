@@ -1,5 +1,5 @@
 # This script can be run alone using the example spectra:
-#> python one_spectra.py '../../data/example_data/spectra/0266/spec-0266-51602-0573.fits'
+#> python one_spectra.py '../../doc/example_data/spectra/0266/spec-0266-51602-0573.fits'
 import numpy as np
 import sys, os
 from os.path import join
