@@ -1,1 +1,0 @@
-Each of the directories here contain the set up used for running Firefly on different surveys, as indicated by the name. These are here for illustrative purposes, so they can be used as examples for your own runs. Examples with detailed explanations can be found under the doc/ directory.
