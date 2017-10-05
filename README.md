@@ -1,4 +1,5 @@
-# Running Firefly
+# Firefly
+## Fitting Iteratively for Relative Likelihood Analysis (of Galaxy Spectra)
 
 FIREFLY is a chi-squared minimisation fitting code that for a given input Spectral Energy Distribution (SED), compares combinations of single-burst stellar population models (SSP), following an iterative best-fitting process until convergence is achieved. The weight of each component can be arbitrary and no regularization or additional prior than the adopted model grid is applied. Dust attenuation is added in a novel way, using a High-Pass Filter (HPF) in order to rectify the continuum before fitting. The returned attenuation array is then matched to known analytical approximations to return an E(B-V) value. This procedure allows for removal of large scale modes of the spectrum associated with dust and/or poor flux calibration. FIREFLY provides light- and mass-weighted stellar population properties (age and metallicity), E(B-V) values and stellar mass for the most likely best fitting model. Errors on these properties are obtained by the likelihood of solutions within the statistical cut (of order 100-1000).
 
