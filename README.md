@@ -15,7 +15,7 @@ Requirements: python 2.7.8 and its main packages all installable through pip: nu
 astro dependencies: astropy, installable with pip
 
 ```
-git clone https://bitbucket.org/firefly_spm/firefly_code
+git clone https://[username]@github.com/[username]/firefly_[doc/dev]
 ```
 
 ## Acknowledgment
@@ -28,7 +28,7 @@ cite the paper Wilkinson et al. 2016 (https://arxiv.org/abs/1503.01124) and Godd
 Once you have downloaded and unpacked the code you need to set some environmental variables adequately. Here there  is an example for a .bashrc file:
 
 ```
-$FF_DIR='[your path to Firefly]/firefly_code'
+$FF_DIR='[your path to Firefly]/firefly_release'
 $PYTHONPATH=‘${FF_DIR}/python:$PYTHONPATH’
 $STELLARPOPMODELS_DIR=‘[your path to the stellar_population models]/stellar_population_models/'
 ```
