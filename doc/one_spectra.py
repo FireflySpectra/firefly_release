@@ -56,25 +56,35 @@ def runSpec(specLiteFile):
 		tables = [prihdu]
 		did_not_converged = 0.
 
+		try :
+			model_1 = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, model_libs = ['MILES'], imfs = ['cha'], age_limits = [ageMin,ageMax], downgrade_models = False, data_wave_medium = 'vacuum', Z_limits = [ZMin,ZMax], use_downgraded_models = True, write_results = False)
+			model_1.fit_models_to_data()
+			tables.append( model_1.tbhdu )
+			# print "m1", time.time()-t0
+		except (ValueError):
+			tables.append( model_1.create_dummy_hdu() )
+			did_not_converged +=1
 
-                models = ['MILES']#,'ELODIE','STELIB']
-                imfmod = [  'cha']#,   'ss',   'kr',]
-                for model in models:
-                        for imf in imfmod:
-                                try :
-                                        model = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, \
-                                                                           model_libs = [model], imfs = [imf], \
-                                                                           age_limits = [ageMin,ageMax], \
-                                                                           downgrade_models = False, data_wave_medium = 'vacuum', \
-                                                                           Z_limits = [ZMin,ZMax], \
-                                                                           use_downgraded_models = True, write_results = False)
-                                        model.fit_models_to_data()
-                                        tables.append( model.tbhdu )
-                                except (ValueError):
-                                        tables.append( model.create_dummy_hdu() )
-                                        did_not_converged +=1
+		try :
+			model_1 = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, model_libs = ['ELODIE'], imfs = ['cha'], age_limits = [ageMin,ageMax], downgrade_models = False, data_wave_medium = 'vacuum', Z_limits = [ZMin,ZMax], use_downgraded_models = True, write_results = False)
+			model_1.fit_models_to_data()
+			tables.append( model_1.tbhdu )
+			# print "m1", time.time()-t0
+		except (ValueError):
+			tables.append( model_1.create_dummy_hdu() )
+			did_not_converged +=1
+
+		try :
+			model_1 = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, model_libs = ['STELIB'], imfs = ['cha'], age_limits = [ageMin,ageMax], downgrade_models = False, data_wave_medium = 'vacuum', Z_limits = [ZMin,ZMax], use_downgraded_models = True, write_results = False)
+			model_1.fit_models_to_data()
+			tables.append( model_1.tbhdu )
+			# print "m1", time.time()-t0
+		except (ValueError):
+			tables.append( model_1.create_dummy_hdu() )
+			did_not_converged +=1
+
 		
-		if did_not_converged < 9 :
+		if did_not_converged < 4 :
 			complete_hdus = spm.pyfits.HDUList(tables)
 			if os.path.isfile(output_file):
 				os.remove(output_file)
@@ -95,4 +105,3 @@ def main():
 	output_function = runSpec(file_name)
 
 main()
-
