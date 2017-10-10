@@ -1,4 +1,4 @@
-import os
+import sys, os
 from os.path import join
 import glob
 import numpy as n
@@ -16,14 +16,9 @@ def writeScript(rootName,indir,outdir,oeroot):
 	f.write("module load apps/anaconda/2.4.1 \n")
 	f.write("module load apps/python/2.7.8/gcc-4.4.7 \n")
 	f.write(" \n")
-	f.write("python run_stellarpop.py "+indir+" "+outdir+" \n")
+	f.write("python "+os.getcwd()+"/run_stellarpop.py "+indir+" "+outdir+" \n")
 	f.write(" \n")
 	f.close()
-
-#--------------------------
-write_scripts = False 
-submit_scripts = True
-#-------------------------
 
 # Directory with input files 
 indir = join(os.environ['FF_DIR'],'doc/example_data/spectra/') ; checkdir(indir)
@@ -41,7 +36,12 @@ print 'Output: ',outdir
 oedir = outdir+'oe/' ; checkdir(oedir)
 print 'Log files: ',oedir
 
+#--------------------------
+write_scripts = False
+submit_scripts = True
+#-------------------------
 if write_scripts:
+	print 'WRITTING the scripts'
 	path2plates = glob.glob(indir+'*')
 	for path2plate in path2plates:
 		plate = path2plate.split('spectra/')[1]
@@ -52,6 +52,7 @@ if write_scripts:
 		writeScript(jobsdir+proot,indir+plate+'/',outplate,oedir+proot)
 
 if submit_scripts:
+	print 'SUBMITTING the jobs'
 	list_of_jobscripts = glob.glob(jobsdir+'*')
 
 	for i in range(len(list_of_jobscripts)):

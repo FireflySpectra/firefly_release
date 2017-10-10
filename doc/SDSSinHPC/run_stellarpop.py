@@ -1,5 +1,5 @@
 # This script can be run as follows:
-#> python run_stellarpop.py ../example_data/spectra/1045/ ../../output/1045/
+#> python run_stellarpop_deep2.py /mnt/lustre/sdss-dr12/deep2/spec/ /users/gonzalev/eboss/firefly/firefly_dev/output/deep2/
 from os.path import join
 import sys, os
 import time
