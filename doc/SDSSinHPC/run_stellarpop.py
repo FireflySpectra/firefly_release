@@ -1,5 +1,5 @@
 # This script can be run as follows:
-#> python run_stellarpop_deep2.py /mnt/lustre/sdss-dr12/deep2/spec/ /users/gonzalev/eboss/firefly/firefly_dev/output/deep2/
+#> python run_stellarpop.py ../example_data/spectra/0266/ ../../output/
 from os.path import join
 import sys, os
 import time
@@ -28,9 +28,10 @@ def runSpec(specLiteFile):
 		# This needs to be changed to your own directory
 		outputFolder = join( os.environ['FF_DIR'], 'output','plate')
 		output_file = join(outputFolder , 'spFly-' + os.path.basename(specLiteFile)[5:-5] )+".fits"
-		print( t0                          )
+		print( "Start time=",t0            )
 		print( output_file                 )
 		print( "--------------------------")
+
 		if os.path.isdir(outputFolder)==False:
 			os.mkdir(outputFolder)		
 		
@@ -146,8 +147,9 @@ def runSpec(specLiteFile):
 				os.remove(output_file)
 				
 			complete_hdus.writeto(output_file)
-	
+
 	print ("time used =", time.time()-t0 ,"seconds")
+
 	return spec
 
 
@@ -169,3 +171,4 @@ for el in fileList:
     else:
         print outputFile
 		
+print 'The end'
