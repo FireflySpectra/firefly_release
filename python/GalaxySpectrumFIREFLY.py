@@ -503,48 +503,34 @@ class GalaxySpectrumFIREFLY:
 			path_to_spectrum = glob.glob(os.path.join(os.environ['DEEP2_DIR'], 'spectra', mask, '*', '*' + objno + '*_fc_tc.dat'))[0]
 		
 			wl, fl, flErr= np.loadtxt(path_to_spectrum, unpack=True)
+
+			self.wavelength = wl	
+			self.flux, self.error= fl * 1e17, flErr * 1e17
 			
 			self.ra = catalog_entry['RA']
 			self.dec = catalog_entry['DEC']
-			self.redshift = catalog_entry['ZBEST']			
-			self.vdisp = 60. #catalog_entry['VDISP']
+			self.redshift = catalog_entry['ZBEST']
 
 			if self.milky_way_reddening :
 				self.ebv_mw = catalog_entry['SFD_EBV']
 		
 		if survey=='deep2_fits':
-			# HEREEEEEEEEEEEEEEEEEEE
-		self.hdulist = pyfits.open(self.path_to_spectrum)
-		self.ra = self.hdulist[0].header['RA']
-		self.dec = self.hdulist[0].header['DEC']
+			path_to_spectrum = catalog_entry
+			self.hdulist = pyfits.open(self.path_to_spectrum)
 
-		self.wavelength = 10**self.hdulist[1].data['loglam']
-		self.flux = self.hdulist[1].data['flux']
-		self.error = self.hdulist[1].data['ivar']**(-0.5)
-		self.bad_flags = np.ones(len(self.wavelength))
-		if survey=='sdssMain':
-			self.redshift = self.hdulist[2].data['Z'][0] 
-		if survey=='sdss3':
-			self.redshift = self.hdulist[2].data['Z_NOQSO'][0] 
-		if survey=='sdss4':
-			self.redshift = self.hdulist[2].data['Z_NOQSO'][0] 
+			self.ra = self.hdulist[0].header['RA']
+			self.dec = self.hdulist[0].header['DEC']
+			self.redshift = self.hdulist[0].header['REDSHIFT']
 			
-		self.vdisp = self.hdulist[2].data['VDISP'][0]
-		self.restframe_wavelength = self.wavelength / (1.0+self.redshift)
+			self.wavelength = self.hdulist[1].data['wavelength']
+			self.flux = self.hdulist[1].data['flux']
+			self.error = self.hdulist[1].data['flux_error']
 
-		self.trust_flag = 1
-		self.objid = 0
-
-			header = fits.open(catalog_entry)
-			header.info()
-			sys.exit()
-		
-		self.wavelength = wl	
-		self.flux, self.error= fl * 1e17, flErr * 1e17
-		
 		self.bad_flags = np.ones(len(self.wavelength))
+
 		self.restframe_wavelength = self.wavelength / (1.0+self.redshift)
 
+		self.vdisp = 60. #catalog_entry['VDISP']
 		self.trust_flag = 1
 		self.objid = 0
 
