@@ -1,6 +1,6 @@
 """
 .. moduleauthor:: Johan Comparat <johan.comparat__at__gmail.com>
-.. minor modifications :: Violeta Gonzalez-Perez <violegp__at__gmail.com>
+.. contributions:: Violeta Gonzalez-Perez <violegp__at__gmail.com>
 
 *General purpose*:
 
@@ -19,7 +19,7 @@ The class GalaxySpectrumFIREFLY is dedicated to handling spectra to be fed to FI
 import numpy as np
 import astropy.io.fits as pyfits
 import glob
-import os
+import sys,os
 from firefly_dust import get_dust_radec
 
 import astropy.cosmology as cc
@@ -61,7 +61,7 @@ class GalaxySpectrumFIREFLY:
 
 	def openILLUSTRISsimulatedSpectrum(self, fractional_error=0.1 ):
 		"""
-		Reads the simulated spectra and converts it to the inputs needed by firefly.
+		Reads the spectra from the Illustris simulation and converts it to the inputs needed by firefly.
 		"""
 		self.ra=0.
 		self.dec=0.
@@ -489,29 +489,48 @@ class GalaxySpectrumFIREFLY:
 			self.ebv_mw = 0.0
 
 
-	def openObservedDEEP2pectrum(self, catalog_entry, survey='deep2'):
+	def openObservedDEEP2pectrum(self, catalog_entry, survey='deep2_ascii'):
 		"""
 		It reads a DEEP2 spectrum and provides the input for the firefly fitting routine.
 		"""
-		mask=str(catalog_entry['MASK'])
-		objno=str(catalog_entry['OBJNO'])
 
-		path_to_spectrum = glob.glob(os.path.join(os.environ['DEEP2_DIR'], 'spectra', mask, '*', '*' + objno + '*_fc_tc.dat'))[0]
+		self.ebv_mw = 0.0
+
+		if survey=='deep2_ascii':
+			mask=str(catalog_entry['MASK'])
+			objno=str(catalog_entry['OBJNO'])
+
+			path_to_spectrum = glob.glob(os.path.join(os.environ['DEEP2_DIR'], 'spectra', mask, '*', '*' + objno + '*_fc_tc.dat'))[0]
 		
-		wl, fl, flErr= np.loadtxt(path_to_spectrum, unpack=True)
+			wl, fl, flErr= np.loadtxt(path_to_spectrum, unpack=True)
+
+			self.wavelength = wl	
+			self.flux, self.error= fl * 1e17, flErr * 1e17
+			
+			self.ra = catalog_entry['RA']
+			self.dec = catalog_entry['DEC']
+			self.redshift = catalog_entry['ZBEST']
+
+			if self.milky_way_reddening :
+				self.ebv_mw = catalog_entry['SFD_EBV']
 		
-		self.wavelength = wl	
-		self.flux, self.error= fl * 1e17, flErr * 1e17
-		
-		self.ra = catalog_entry['RA']
-		self.dec = catalog_entry['DEC']
+		if survey=='deep2_fits':
+			path_to_spectrum = catalog_entry
+			self.hdulist = pyfits.open(self.path_to_spectrum)
+
+			self.ra = self.hdulist[0].header['RA']
+			self.dec = self.hdulist[0].header['DEC']
+			self.redshift = self.hdulist[0].header['REDSHIFT']
+			
+			self.wavelength = self.hdulist[1].data['wavelength']
+			self.flux = self.hdulist[1].data['flux']
+			self.error = self.hdulist[1].data['flux_error']
 
 		self.bad_flags = np.ones(len(self.wavelength))
-		self.redshift = catalog_entry['ZBEST']
-			
-		self.vdisp = 60. #catalog_entry['VDISP']
+
 		self.restframe_wavelength = self.wavelength / (1.0+self.redshift)
 
+		self.vdisp = 60. #catalog_entry['VDISP']
 		self.trust_flag = 1
 		self.objid = 0
 
@@ -534,10 +553,6 @@ class GalaxySpectrumFIREFLY:
 		for wi,w in enumerate(self.wavelength):
 			self.r_instrument[wi] = 6000.
 
-		if self.milky_way_reddening :
-			self.ebv_mw = catalog_entry['SFD_EBV']
-		else:
-			self.ebv_mw = 0.0
 
 	def openObservedMuseSpectrum(self, catalog):
 		"""Loads an observed MUSE spectrum in counts.
