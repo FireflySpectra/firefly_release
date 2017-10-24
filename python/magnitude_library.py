@@ -1,5 +1,5 @@
 """
-@author: Johan Comparat, minor modifications by Violeta Gonzalez-Perez
+@author: Johan Comparat, minor modification by Violeta Gonzalez-Perez
 @license: Gnu Public Licence
 """
 from scipy.interpolate import interp1d
