@@ -15,7 +15,7 @@ Requirements: python 2.7.8 and its main packages all installable through pip: nu
 astro dependencies: astropy, installable with pip
 
 ```
-git clone https://[username]@github.com/[username]/firefly_[doc/dev]
+git clone https://[username]@github.com/[username]/firefly_release
 ```
 
 ## Acknowledgment
