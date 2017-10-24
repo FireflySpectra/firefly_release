@@ -1,11 +1,13 @@
 """
-@author: Johan Comparat
+@author: Johan Comparat, minor modifications by Violeta Gonzalez-Perez
 @license: Gnu Public Licence
 """
 from scipy.interpolate import interp1d
 from scipy.integrate import quad
 import numpy as np
 import os 
+
+env_spm = 'STELLARPOPMODELS_DIR'
 
 class Photo():
 	"""
@@ -23,6 +25,7 @@ class Photo():
 		* loadMegacam()
 		* loadSDSS()
 	"""
+
 	def __init__(self, name="SDSS"):
 		"""
 		:type name: string
@@ -47,11 +50,11 @@ class Photo():
 		"""
 		Loads the filters of Megacam, wavelength and percent. Not normalized
 		"""
-		uf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/cfht/megacam_filter/uMegacam.filter"), unpack=True)                  
-		gf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/cfht/megacam_filter/gMegacam.filter"), unpack=True)
-		rf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/cfht/megacam_filter/rMegacam.filter"), unpack=True)
-		yf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/cfht/megacam_filter/yMegacam.filter"), unpack=True)
-		zf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/cfht/megacam_filter/zMegacam.filter"), unpack=True)
+		uf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/cfht/megacam_filter/uMegacam.filter"), unpack=True)                  
+		gf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/cfht/megacam_filter/gMegacam.filter"), unpack=True)
+		rf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/cfht/megacam_filter/rMegacam.filter"), unpack=True)
+		yf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/cfht/megacam_filter/yMegacam.filter"), unpack=True)
+		zf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/cfht/megacam_filter/zMegacam.filter"), unpack=True)
 		self.uFilterMegaCam=interp1d(uf[0],uf[1])
 		self.gFilterMegaCam=interp1d(gf[0],gf[1])
 		self.rFilterMegaCam=interp1d(rf[0],rf[1])
@@ -68,11 +71,11 @@ class Photo():
 		self.filter_names = ["SDSS_u", "SDSS_g", "SDSS_r", "SDSS_i", "SDSS_z"]
 		self.nFilters=5
 		
-		uf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/sdss/uSDSS.filter"), unpack=True)                  
-		gf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/sdss/gSDSS.filter"), unpack=True)
-		rf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/sdss/rSDSS.filter"), unpack=True)
-		yf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/sdss/iSDSS.filter"), unpack=True)
-		zf=np.loadtxt(os.path.join(os.environ["GIT_SPM"], "filter/sdss/zSDSS.filter"), unpack=True)
+		uf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/uSDSS.filter"), unpack=True)                  
+		gf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/gSDSS.filter"), unpack=True)
+		rf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/rSDSS.filter"), unpack=True)
+		yf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/iSDSS.filter"), unpack=True)
+		zf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/zSDSS.filter"), unpack=True)
 		
 		self.lambda_min={'SDSS_u': np.min(uf[0]), 'SDSS_g':  np.min(gf[0]),'SDSS_r':  np.min(rf[0]),'SDSS_i':  np.min(yf[0]), 'SDSS_z':  np.min(zf[0]) }        
 		self.lambda_max={'SDSS_u': np.max(uf[0]), 'SDSS_g':  np.max(gf[0]),'SDSS_r':  np.max(rf[0]),'SDSS_i':  np.max(yf[0]), 'SDSS_z':  np.max(zf[0]) }        
