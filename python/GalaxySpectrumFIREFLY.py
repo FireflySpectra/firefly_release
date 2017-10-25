@@ -752,3 +752,46 @@ class GalaxySpectrumFIREFLY:
 			self.ebv_mw = get_dust_radec(ra,dec,'ebv')
 		else:
 			self.ebv_mw = 0.0
+			
+	def openGCsUsher(self):
+			hdulist = pyfits.open(self.path_to_spectrum)
+			hdulist.info()
+
+			ra = hdulist[0].header['RA']
+			dec = hdulist[0].header['DEC']
+			redshift = hdulist[0].header['REDSHIFT']
+	
+			naxis1 = hdulist[0].header['NAXIS2']
+			cdelt1 = hdulist[0].header['CDELT1']
+			crval1 = hdulist[0].header['CRVAL1']
+			crval2 = hdulist[0].header['CRVAL2']
+			restframe_wavelength = np.arange(crval1,crval2,cdelt1)
+			wavelength = restframe_wavelength * (1. + redshift)
+			
+			meanWL = (wavelength[1:]+wavelength[:-1])/2.
+			deltaWL = hdulist[0].header['FWHM']
+			resolution = np.ones_like(wavelength)*np.mean(meanWL / deltaWL)
+			vdisp  = hdulist[0].header['VELDISP']
+
+			flux = hdulist[0].data
+			flux = flux.flatten()
+			error = hdulist[1].data
+			error = error.flatten()
+			bad_flags = np.ones(len(restframe_wavelength))
+	
+			bad_data = np.isnan(flux) | np.isinf(flux) | (flux <= 0.0) | np.isnan(error) | np.isinf(error) 
+			# removes the bad data from the spectrum 
+			flux[bad_data] = 0.0
+			error[bad_data] = np.max(flux) * 99999999999.9
+			bad_flags[bad_data] = 0
+
+			self.xpos, self.ypos, self.redshift, self.restframe_wavelength, self.wavelength = ra, dec, redshift, restframe_wavelength, wavelength
+			self.flux, self.error, self.bad_flags, self.r_instrument, self.vdisp = flux, error, bad_flags, resolution, vdisp
+			self.trust_flag, self.objid = True, ''
+
+			if self.milky_way_reddening :
+			# gets the amount of MW reddening on the models
+				self.ebv_mw = get_dust_radec(ra,dec,'ebv')
+			else:
+				self.ebv_mw = 0.0
+
