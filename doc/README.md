@@ -14,4 +14,6 @@ Here we provide some examples on how to run Firefly and how to read the fits to 
 
 **example_data** This folder contains one Firefly output example and 3 SDSS spectra to run Firefly over.
 
+**run_GC_example.py** This is a stand-alone python routine to run a globular cluster spectrum (exmple_data/spectra/NGC7099_2016-10-01.fits) with Firefly  
+
 
