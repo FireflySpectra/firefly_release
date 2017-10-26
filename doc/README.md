@@ -10,10 +10,8 @@ Here we provide some examples on how to run Firefly and how to read the fits to 
 
 **one_spectra_firefly.ipynb** This notebook shows how to run Firefly over one example spectra. This is complementary to the example script: ../bin/SDSS/one_spectra.py.
 
+**GC_spectrum.ipynb** This is a stand-alone python routine to run a globular cluster spectrum (exmple_data/spectra/NGC7099_2016-10-01.fits) with Firefly  
+
 **SDSSinHPC** This directory contains a script to write and submit jobs to an HPC facility such as [Sciama](http://www.sciama.icg.port.ac.uk/), using qsub commands, that call the 'run_stellarpop.py' code.
 
 **example_data** This folder contains one Firefly output example and 3 SDSS spectra to run Firefly over.
-
-**run_GC_example.py** This is a stand-alone python routine to run a globular cluster spectrum (exmple_data/spectra/NGC7099_2016-10-01.fits) with Firefly  
-
-
