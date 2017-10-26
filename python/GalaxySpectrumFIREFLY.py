@@ -1,6 +1,7 @@
 """
 .. moduleauthor:: Johan Comparat <johan.comparat__at__gmail.com>
 .. contributions:: Violeta Gonzalez-Perez <violegp__at__gmail.com>
+..                 Sofia Meneses-Goytia <s.menesesgoytia__at__gmail.com>
 
 *General purpose*:
 
@@ -25,7 +26,7 @@ from firefly_dust import get_dust_radec
 import astropy.cosmology as cc
 cosmo = cc.Planck13
 import astropy.units as uu
-
+import cmath
 
 class GalaxySpectrumFIREFLY:
 	"""
