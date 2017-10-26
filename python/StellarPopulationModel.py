@@ -1,5 +1,6 @@
 """
 .. moduleauthor:: Johan Comparat <johan.comparat__at__gmail.com>
+.. contributor :: Sofia Meneses-Goytia <s.menesesgoytia__at__gmail.com>
 .. minor modifications :: Violeta Gonzalez-Perez <violegp__at__gmail.com>
 
 General purpose:
@@ -491,8 +492,31 @@ class StellarPopulationModel:
                                                 final_ML_turnoff.append(mass_per_ssp[number]*new_ML_turnoff)
                                                 final_gas_fraction.append(mass_per_ssp[number]-new_ML_totM)
                                         final_ML_totM, final_ML_alive, final_ML_wd, final_ML_ns, final_ML_bh, final_ML_turnoff, final_gas_fraction= np.array(final_ML_totM), np.array(final_ML_alive), np.array(final_ML_wd), np.array(final_ML_ns), np.array(final_ML_bh), np.array(final_ML_turnoff), np.array(final_gas_fraction)
-        
-        			if ((dict_imfs[self.imfs[0]] == 'Kroupa') or (dict_imfs[self.imfs[0]] == 'Chabrier')):
+
+        			if (dict_imfs[self.imfs[0]] == 'Chabrier'):
+        				ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data', 'massloss_chabrier.txt'), unpack=True, skiprows=2)
+        				# First build the grids of the quantities. Make sure they are in linear units.			
+        				estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
+        				estimate_ML_ns, estimate_ML_bh, estimate_ML_turnoff = estimation(10**ML_metallicity, ML_age, ML_ns), estimation(10**ML_metallicity, ML_age, ML_bh), estimation(10**ML_metallicity, ML_age, ML_turnoff)
+        				# Now loop through SSPs to find the nearest values for each.
+        				final_ML_totM, final_ML_alive, final_ML_wd, final_ML_ns, final_ML_bh, final_ML_turnoff, final_gas_fraction = [], [], [], [], [], [], []
+        				for number in range(len(age_per_ssp)):
+        					new_ML_totM = estimate_ML_totM.estimate(metal_per_ssp[number],age_per_ssp[number])
+        					new_ML_alive = estimate_ML_alive.estimate(metal_per_ssp[number],age_per_ssp[number])
+        					new_ML_wd = estimate_ML_wd.estimate(metal_per_ssp[number],age_per_ssp[number])
+        					new_ML_ns = estimate_ML_ns.estimate(metal_per_ssp[number],age_per_ssp[number])
+        					new_ML_bh = estimate_ML_bh.estimate(metal_per_ssp[number],age_per_ssp[number])
+        					new_ML_turnoff = estimate_ML_turnoff.estimate(metal_per_ssp[number],age_per_ssp[number])
+        					final_ML_totM.append(mass_per_ssp[number]*new_ML_totM)
+        					final_ML_alive.append(mass_per_ssp[number]*new_ML_alive)
+        					final_ML_wd.append(mass_per_ssp[number]*new_ML_wd)
+        					final_ML_ns.append(mass_per_ssp[number]*new_ML_ns)
+        					final_ML_bh.append(mass_per_ssp[number]*new_ML_bh)
+        					final_ML_turnoff.append(mass_per_ssp[number]*new_ML_turnoff)
+        					final_gas_fraction.append(mass_per_ssp[number]-new_ML_totM)
+        				final_ML_totM, final_ML_alive, final_ML_wd, final_ML_ns, final_ML_bh, final_ML_turnoff, final_gas_fraction= np.array(final_ML_totM), np.array(final_ML_alive), np.array(final_ML_wd), np.array(final_ML_ns), np.array(final_ML_bh), np.array(final_ML_turnoff), np.array(final_gas_fraction)
+					
+        			if (dict_imfs[self.imfs[0]] == 'Kroupa'):
         				ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data','massloss_kroupa.txt'), unpack=True, skiprows=2)
         				# First build the grids of the quantities. Make sure they are in linear units.			
         				estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
