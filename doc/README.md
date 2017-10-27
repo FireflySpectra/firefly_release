@@ -1,6 +1,8 @@
 # Running Firefly 
 
-Here we provide some examples on how to run Firefly and how to read the fits to one SDSS output. The full documentation of the Python code generated with Sphynx can be found [here](http://www.mpe.mpg.de/~comparat/firefly_doc/). 
+Here we provide some examples on how to run Firefly and how to read the fits to one SDSS output. This examples have been written in Python2. 
+
+The full documentation of the Python code generated with Sphynx can be found [here](http://www.mpe.mpg.de/~comparat/firefly_doc/). 
 
 ## Content 
 

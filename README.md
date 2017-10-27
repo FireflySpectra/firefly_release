@@ -32,7 +32,7 @@ cite the paper Wilkinson et al. 2016 (https://arxiv.org/abs/1503.01124) and Godd
 
 
 ## Environmental variables
-Once you have downloaded and unpacked the code you need to set some environmental variables adequately. Here there  is an example for a .bashrc file:
+Once you have downloaded and unpacked the code you need to set some environmental variables adequately. Here there  is an example for a .bashrc or .bash_profile file:
 
 ```
 $FF_DIR='[your path to Firefly]/firefly_release'
