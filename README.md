@@ -3,7 +3,7 @@
 
 FIREFLY is a chi-squared minimisation fitting code that for a given input Spectral Energy Distribution (SED), compares combinations of single-burst stellar population models (SSP), following an iterative best-fitting process until convergence is achieved. The weight of each component can be arbitrary and no regularization or additional prior than the adopted model grid is applied. Dust attenuation is added in a novel way, using a High-Pass Filter (HPF) in order to rectify the continuum before fitting. The returned attenuation array is then matched to known analytical approximations to return an E(B-V) value. This procedure allows for removal of large scale modes of the spectrum associated with dust and/or poor flux calibration. FIREFLY provides light- and mass-weighted stellar population properties (age and metallicity), E(B-V) values and stellar mass for the most likely best fitting model. Errors on these properties are obtained by the likelihood of solutions within the statistical cut (of order 100-1000).
 
-The code can fit a wide range of stellar population models and galaxy spectra. At present, the code contains functionality to fit the observed galaxy spectra from SDSS, DEEP2, VVDS, VIPERS and MaNGA.
+The code can fit a wide range of stellar population models and galaxy spectra. At present, the code contains functionality to fit the observed galaxy spectra from SDSS (for the main sample and MaNGA), DEEP2 and globular clusters.
 
 The full documentation of the Python code generated with Sphynx can be found [here.](http://www.mpe.mpg.de/~comparat/firefly_doc/)
 
@@ -12,7 +12,6 @@ The Stellar Population Models templates and mass loss files can be downloaded fr
 ```
 svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stellar_population_models
 ```
-
 
 * [Claudia Maraston's repository](http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/)
 
