@@ -10,7 +10,7 @@ The full documentation of the Python code generated with Sphynx can be found [he
 The Stellar Population Models templates and mass loss files can be downloaded from:
 * [SDSS Data Base](https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/) (this is password protected at the moment, you can use your SDSS account credentials if you have one):
 ```
-svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stellarpopmodels
+svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stellar_population_models
 ```
 
 * [Claudia Maraston's repository](http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/)
@@ -26,12 +26,14 @@ git clone https://[username]@github.com/[username]/firefly_release
 
 ## Acknowledgment
 
-If you use this code as a resource to produce a scientific result, please :
-cite the paper Wilkinson et al. 2016 (https://arxiv.org/abs/1503.01124) and Goddard et al. 2017 (https://arxiv.org/abs/1612.01546).
+If you use this code as a resource to produce a scientific result, cite the papers:
+
+* [Wilkinson et al. 2016](https://arxiv.org/abs/1503.01124)
+* [Goddard et al. 2017](https://arxiv.org/abs/1612.01546).
 
 
 ## Environmental variables
-Once you have downloaded and unpacked the code you need to set some environmental variables adequately. Here there  is an example for a .bashrc file:
+Once you have downloaded and unpacked the code you need to set some environmental variables adequately. Here there  is an example for a .bashrc or .bash_profile file:
 
 ```
 $FF_DIR='[your path to Firefly]/firefly_release'

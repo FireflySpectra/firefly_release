@@ -31,13 +31,12 @@ def runSpec(specLiteFile):
 		outputFolder = join(os.environ['FF_DIR'],'output')
 		output_file = join(outputFolder , 'spFly-' + os.path.basename(specLiteFile)[5:-5] )+".fits"
 
-		print( t0                          )
+		print( 'Output file:'              )
 		print( output_file                 )
 		print( "--------------------------")
 		if os.path.isdir(outputFolder)==False:
 			os.mkdir(outputFolder)
-		
-		
+				
 		prihdr = spm.pyfits.Header()
 		prihdr['FILE']          = os.path.basename(output_file)
 		prihdr['PLATE']         = plate 
