@@ -10,7 +10,7 @@ The full documentation of the Python code generated with Sphynx can be found [he
 The Stellar Population Models templates and mass loss files can be downloaded from:
 * [SDSS Data Base](https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/) (this is password protected at the moment, you can use your SDSS account credentials if you have one):
 ```
-svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stellarpopmodels
+svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stellar_population_models
 ```
 
 
