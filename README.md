@@ -27,8 +27,10 @@ git clone https://[username]@github.com/[username]/firefly_release
 
 ## Acknowledgment
 
-If you use this code as a resource to produce a scientific result, please :
-cite the paper Wilkinson et al. 2016 (https://arxiv.org/abs/1503.01124) and Goddard et al. 2017 (https://arxiv.org/abs/1612.01546).
+If you use this code as a resource to produce a scientific result, cite the papers:
+
+* [Wilkinson et al. 2016](https://arxiv.org/abs/1503.01124)
+* [Goddard et al. 2017](https://arxiv.org/abs/1612.01546).
 
 
 ## Environmental variables
