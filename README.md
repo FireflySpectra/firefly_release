@@ -7,18 +7,6 @@ The code can fit a wide range of stellar population models and galaxy spectra. A
 
 The full documentation of the Python code generated with Sphynx can be found [here.](http://www.mpe.mpg.de/~comparat/firefly_doc/)
 
-The Stellar Population Models templates and mass loss files can be downloaded from:
-* [SDSS Data Base](https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/) (this is password protected at the moment, you can use your SDSS account credentials if you have one):
-```
-svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stellar_population_models
-```
-
-* [Claudia Maraston's repository](http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/). Here is how to download all the provided models:
-```
-mkdir stellar_population_models/
-cd stellar_population_models/
-wget -r -nH --cut-dirs=2 --no-parent --reject="index.html*" http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/
-```
 
 ## Installation
 
@@ -27,6 +15,19 @@ astro dependencies: astropy, installable with pip
 
 ```
 git clone https://[username]@github.com/[username]/firefly_release
+```
+
+The Stellar Population Models templates and mass loss files can be downloaded from:
+* Use the following line to download all the stellar population model templates and the mass loss files from the [SDSS Data Base](https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/) (this is password protected at the moment, you can use your SDSS account credentials if you have one):
+```
+svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stellar_population_models
+```
+
+* Use the following lines to download all the stellar population model templates and the mass loss files from [Claudia Maraston's repository](http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/):
+```
+mkdir stellar_population_models/
+cd stellar_population_models/
+wget -r -nH --cut-dirs=2 --no-parent --reject="index.html*" http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/
 ```
 
 ## Acknowledgment
