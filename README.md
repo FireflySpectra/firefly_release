@@ -13,7 +13,12 @@ The Stellar Population Models templates and mass loss files can be downloaded fr
 svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stellar_population_models
 ```
 
-* [Claudia Maraston's repository](http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/)
+* [Claudia Maraston's repository](http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/). Here is how to download all the provided models:
+```
+mkdir stellar_population_models/
+cd stellar_population_models/
+wget -r -nH --cut-dirs=2 --no-parent --reject="index.html*" http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/
+```
 
 ## Installation
 
@@ -33,12 +38,27 @@ If you use this code as a resource to produce a scientific result, cite the pape
 
 
 ## Environmental variables
-Once you have downloaded and unpacked the code you need to set some environmental variables adequately. Here there  is an example for a .bashrc or .bash_profile file:
+Once you have downloaded and unpacked the code you need to set some environmental variables adequately.
 
+Example for a .bash_profile file (MAC users):
+```
+export FF_DIR='[your path to Firefly]/firefly_release-master'
+export PYTHONPATH='${FF_DIR}/python:$PYTHONPATH'
+export STELLARPOPMODELS_DIR=‘[your path to Firefly]/stellar_population_models/'
+```
+
+Example for a .bashrc file:
 ```
 $FF_DIR='[your path to Firefly]/firefly_release'
 $PYTHONPATH=‘${FF_DIR}/python:$PYTHONPATH’
-$STELLARPOPMODELS_DIR=‘[your path to the stellar_population models]/stellar_population_models/'
+$STELLARPOPMODELS_DIR=‘[your path to Firefly]/stellar_population_models/'
+```
+
+Example for a .cshrc file:
+```
+setenv FF_DIR '[your path to Firefly]/firefly_release'
+setenv PYTHONPATH ${PYTHONPATH}:${FF_DIR}/python
+setenv STELLARPOPMODELS_DIR '[your path to Firefly]/stellar_population_models/'
 ```
 
 ## Content 
