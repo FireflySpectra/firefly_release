@@ -45,21 +45,21 @@ Example for a .bash_profile file (MAC users):
 ```
 export FF_DIR='[your path to Firefly]/firefly_release-master'
 export PYTHONPATH='${FF_DIR}/python:$PYTHONPATH'
-export STELLARPOPMODELS_DIR=‘[your path to Firefly]/stellar_population_models/'
+export STELLARPOPMODELS_DIR=‘[your path to Firefly]/stellar_population_models'
 ```
 
 Example for a .bashrc file:
 ```
 $FF_DIR='[your path to Firefly]/firefly_release'
 $PYTHONPATH=‘${FF_DIR}/python:$PYTHONPATH’
-$STELLARPOPMODELS_DIR=‘[your path to Firefly]/stellar_population_models/'
+$STELLARPOPMODELS_DIR=‘[your path to Firefly]/stellar_population_models'
 ```
 
 Example for a .cshrc file:
 ```
 setenv FF_DIR '[your path to Firefly]/firefly_release'
 setenv PYTHONPATH ${PYTHONPATH}:${FF_DIR}/python
-setenv STELLARPOPMODELS_DIR '[your path to Firefly]/stellar_population_models/'
+setenv STELLARPOPMODELS_DIR '[your path to Firefly]/stellar_population_models'
 ```
 
 ## Content 
