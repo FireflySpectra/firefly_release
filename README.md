@@ -38,9 +38,11 @@ svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stella
 
 We are delighted you use our code! If you use our code, please cite the following papers:
 
-* [Wilkinson et al. 2017](https://arxiv.org/abs/)
-* [Comparat et al. 2018, in prep.]
-* [Goddard et al. 2017](https://arxiv.org/abs/1612.01546).
+* [Wilkinson et al. 2017](http://adsabs.harvard.edu/abs/2017MNRAS.472.4297W) for the code and its description and testing
+* [Comparat et al. 2018, in prep.] for description of the SDSS-IV DR14 run and testing of the code performance
+* [Goddard et al. 2017](https://arxiv.org/abs/1612.01546) for description of the SDSS-IV/MANGA run and testing of the code performance
+* [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) for the stellar population models.
+
 
 ## Environmental variables
 Once you have downloaded and unpacked the code you need to set some environmental variables adequately.
