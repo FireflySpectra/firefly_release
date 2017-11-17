@@ -9,6 +9,16 @@ The code can in principle fit any model to any spectrum at any spectral resoluti
 
 The full documentation of the Python code generated with Sphynx can be found [here.](http://www.mpe.mpg.de/~comparat/firefly_doc/)
 
+## Acknowledgment
+
+We are delighted you use our code! If you use our code, please cite the following papers:
+
+* [Wilkinson et al. 2017](http://adsabs.harvard.edu/abs/2017MNRAS.472.4297W) for the code, its description and testing.
+* [Comparat et al. 2018, in prep.]() for description of the SDSS-IV DR14 run and testing of the code performance.
+* [Goddard et al. 2017](https://arxiv.org/abs/1612.01546) for description of the SDSS-IV/MANGA run and testing of the code performance.
+* [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) for the stellar population models.
+
+
 ## Installation
 
 Requirements: python 2.7.8 and its main packages all installable through pip: numpy, scipy, matplotlib, math ...
@@ -17,6 +27,10 @@ astro dependencies: astropy, installable with pip
 ```
 git clone https://[username]@github.com/[username]/firefly_release
 ```
+
+### Stellar Population model templates 
+
+There are single stellar population (SSP) model templates available to download. These where produced with the [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) (M11) stellar population model, combined with different stellar libraries and assuming three initial mass functions (IMF, Chabrier, Kroupa and Salpeter).
 
 * Use the following lines to download all the stellar population model templates and the files for taking into account stellar mass loss from [Claudia Maraston's repository](http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/):
 ```
@@ -30,17 +44,9 @@ wget -r -nH --cut-dirs=2 --no-parent --reject="index.html*" http://icg.port.ac.u
 svn checkout https://svn.sdss.org/data/sdss/stellarpopmodels/tags/v1_0_2/ stellar_population_models
 ```
 
-## Acknowledgment
+Note that the different spectral libraries which are used for the M11 SSP suite have different coverage in age and metallicity (and also wavelength range somewhat). This is due to the different inclusion of stellar types in the libraries (extensive discussion in the M11 paper). Thus, when the library changes, the fits for the same galaxy will also do, e.g. a different age, which will push your mass to a different value. To effectively assess the effect of the input stellar library, one should run fits for identical age, Z and wavelength range input.
 
-We are delighted you use our code! If you use our code, please cite the following papers:
-
-* [Wilkinson et al. 2017](http://adsabs.harvard.edu/abs/2017MNRAS.472.4297W) for the code and its description and testing
-* [Comparat et al. 2018, in prep.] for description of the SDSS-IV DR14 run and testing of the code performance
-* [Goddard et al. 2017](https://arxiv.org/abs/1612.01546) for description of the SDSS-IV/MANGA run and testing of the code performance
-* [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) for the stellar population models.
-
-
-## Environmental variables
+### Environmental variables
 Once you have downloaded and unpacked the code you need to set some environmental variables adequately.
 
 Example for a .bash_profile file (MAC users):
@@ -64,7 +70,7 @@ setenv PYTHONPATH ${PYTHONPATH}:${FF_DIR}/python
 setenv STELLARPOPMODELS_DIR '[your path to Firefly]/stellar_population_models'
 ```
 
-## Content 
+## Content of this repository
 
 **bin** Example scripts to run Firefly using certain sets of data and using high performance computing facilities.
 
