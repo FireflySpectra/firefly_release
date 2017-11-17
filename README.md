@@ -36,7 +36,7 @@ There are single stellar population (SSP) model templates available to download.
 ```
 mkdir stellar_population_models/
 cd stellar_population_models/
-wget -r -nH --cut-dirs=2 --no-parent --reject="index.html*" http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/
+wget -r -nH --cut-dirs=2 --no-parent --reject="index.html*" http://icg.port.ac.uk/~firefly/stellar_population_models/data/
 ```
 
 *	Or from the SDSS Data Base (this is password protected at the moment, you can use your SDSS account credentials if you have one):
