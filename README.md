@@ -32,7 +32,7 @@ git clone https://[username]@github.com/[username]/firefly_release
 
 There are single stellar population (SSP) model templates available to download. These where produced with the [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) (M11) stellar population model, combined with different stellar libraries and assuming three initial mass functions (IMF, Chabrier, Kroupa and Salpeter).
 
-* Use the following lines to download all the stellar population model templates and the files for taking into account stellar mass loss from [Claudia Maraston's repository](http://icg.port.ac.uk/~manga-firefly/stellar_population_models/data/):
+* Use the following lines to download all the stellar population model templates and the files for taking into account stellar mass loss from [Claudia Maraston's repository](http://icg.port.ac.uk/~firefly/stellar_population_models/data/):
 ```
 mkdir stellar_population_models/
 cd stellar_population_models/
