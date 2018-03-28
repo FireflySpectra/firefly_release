@@ -1,7 +1,8 @@
 """
 .. moduleauthor:: Johan Comparat <johan.comparat__at__gmail.com>
 .. contributor :: Sofia Meneses-Goytia <s.menesesgoytia__at__gmail.com>
-.. minor modifications :: Violeta Gonzalez-Perez <violegp__at__gmail.com>
+.. contributor :: Violeta Gonzalez-Perez <violegp__at__gmail.com>
+.. contributor :: Harry Hicks <iamhrh__at__hotmail.co.uk>
 
 General purpose:
 ................
@@ -229,6 +230,16 @@ class StellarPopulationModel:
 				elif zchar == 'z10m4':
 					#znum = -2.300
 					znum = 10**-2.300
+                                elif zchar == 'z-0.6':
+                                        znum = 10**-0.6
+                                elif zchar == 'z-0.9':
+                                        znum = 10**-0.9
+                                elif zchar == 'z-1.2':
+                                       znum = 10**-1.2
+                                elif zchar == 'z-1.6':
+                                        znum = 10**-1.6
+                                elif zchar == 'z-1.9':
+                                        znum = 10**-1.9
 				else:
 					raise NameError('Unrecognised metallicity! Check model file names.')
 
