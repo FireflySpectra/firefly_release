@@ -2,6 +2,7 @@
 .. moduleauthor:: Johan Comparat <johan.comparat__at__gmail.com>
 .. contributor :: Sofia Meneses-Goytia <s.menesesgoytia__at__gmail.com>
 .. contributor :: Violeta Gonzalez-Perez <violegp__at__gmail.com>
+.. contributor :: Jianhui Lian <Jianhui.lian@port.ac.uk >
 .. contributor :: Harry Hicks <iamhrh__at__hotmail.co.uk>
 
 General purpose:
