@@ -45,18 +45,18 @@ def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 	# upper_limit_fit = 10 # maximum number of iterations before it gives up!
 	# fit_cap			= 1000 # maximum number of fit objects to be created per iteration
 
-	num_models 	= len(models)
-	num_wave 	= len(wavelength)
-	
 	global num_models	
+	num_models 	= len(models)
+
+	num_wave 	= len(wavelength)
 	global bic_n
 	bic_n = np.log(num_wave)
 
+	global chi_models
 	chi_models = np.zeros(np.shape(models))
 	for m in range(num_models):
 		chi_models[m] = (models[m]-data)/error
-	global chi_models
-	
+
 	class fit(object):
 
 		"""
