@@ -1,7 +1,9 @@
 """
 .. moduleauthor:: Johan Comparat <johan.comparat__at__gmail.com>
+.. contributor :: Harry Hicks <iamhrh__at__hotmail.co.uk>
+.. contributor :: Violeta Gonzalez-Perez <violegp__at__gmail.com>
+.. contributor :: Jianhui Lian <Jianhui.lian@port.ac.uk >
 .. contributor :: Sofia Meneses-Goytia <s.menesesgoytia__at__gmail.com>
-.. minor modifications :: Violeta Gonzalez-Perez <violegp__at__gmail.com>
 
 General purpose:
 ................
@@ -229,6 +231,16 @@ class StellarPopulationModel:
 				elif zchar == 'z10m4':
 					#znum = -2.300
 					znum = 10**-2.300
+                                elif zchar == 'z-0.6':
+                                        znum = 10**-0.6
+                                elif zchar == 'z-0.9':
+                                        znum = 10**-0.9
+                                elif zchar == 'z-1.2':
+                                       znum = 10**-1.2
+                                elif zchar == 'z-1.6':
+                                        znum = 10**-1.6
+                                elif zchar == 'z-1.9':
+                                        znum = 10**-1.9
 				else:
 					raise NameError('Unrecognised metallicity! Check model file names.')
 
@@ -592,27 +604,29 @@ class StellarPopulationModel:
                                 tbhdu.header['HIERARCH metallicity_massW_low_2sig'] = trylog10(averages['mass_metal_2_sig_minus'])
                                 tbhdu.header['HIERARCH metallicity_massW_up_3sig'] = trylog10(averages['mass_metal_3_sig_plus'])
                                 tbhdu.header['HIERARCH metallicity_massW_low_3sig'] = trylog10(averages['mass_metal_3_sig_minus'])
-        			tbhdu.header['HIERARCH stellar_mass'] = trylog10(averages['stellar_mass'])
-                                tbhdu.header['HIERARCH living_stars_mass'] = trylog10(combined_ML_totM)
-                                tbhdu.header['HIERARCH remnant_mass'] = trylog10(combined_ML_alive)
+        			tbhdu.header['HIERARCH total_mass'] = trylog10(averages['stellar_mass'])
+				tbhdu.header['HIERARCH stellar_mass'] = trylog10(combined_ML_alive+combined_ML_wd+combined_ML_ns+combined_ML_bh)
+				tbhdu.header['HIERARCH living_stars_mass'] = trylog10(combined_ML_alive)
+				tbhdu.header['HIERARCH remnant_mass'] = trylog10(combined_ML_wd+combined_ML_ns+combined_ML_bh)
                                 tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs'] = trylog10(combined_ML_wd)
                                 tbhdu.header['HIERARCH remnant_mass_in_neutronstars'] = trylog10(combined_ML_ns)
                                 tbhdu.header['HIERARCH remnant_mass_blackholes'] = trylog10(combined_ML_bh)
                                 tbhdu.header['HIERARCH mass_of_ejecta'] = trylog10(combined_gas_fraction)
-        			tbhdu.header['HIERARCH stellar_mass_up_1sig'] = trylog10(averages['stellar_mass_1_sig_plus'])
-        			tbhdu.header['HIERARCH stellar_mass_low_1sig'] = trylog10(averages['stellar_mass_1_sig_minus'])
-        			tbhdu.header['HIERARCH stellar_mass_up_2sig'] = trylog10(averages['stellar_mass_2_sig_plus'])
-                                tbhdu.header['HIERARCH stellar_mass_low_2sig'] = trylog10(averages['stellar_mass_2_sig_minus'])
-        			tbhdu.header['HIERARCH stellar_mass_up_3sig'] = trylog10(averages['stellar_mass_3_sig_plus'])
-                                tbhdu.header['HIERARCH stellar_mass_low_3sig'] = trylog10(averages['stellar_mass_3_sig_minus'])
+        			tbhdu.header['HIERARCH total_mass_up_1sig'] = trylog10(averages['stellar_mass_1_sig_plus'])
+        			tbhdu.header['HIERARCH total_mass_low_1sig'] = trylog10(averages['stellar_mass_1_sig_minus'])
+        			tbhdu.header['HIERARCH total_mass_up_2sig'] = trylog10(averages['stellar_mass_2_sig_plus'])
+                                tbhdu.header['HIERARCH total_mass_low_2sig'] = trylog10(averages['stellar_mass_2_sig_minus'])
+        			tbhdu.header['HIERARCH total_mass_up_3sig'] = trylog10(averages['stellar_mass_3_sig_plus'])
+                                tbhdu.header['HIERARCH total_mass_low_3sig'] = trylog10(averages['stellar_mass_3_sig_minus'])
         			tbhdu.header['HIERARCH EBV'] = best_ebv
         			tbhdu.header['HIERARCH ssp_number'] =len(order)
         
         			# quantities per SSP
         			for iii in range(len(order)):
-        				tbhdu.header['HIERARCH stellar_mass_ssp_'+str(iii)] = trylog10(mass_per_ssp[order][iii])
-        				tbhdu.header['HIERARCH living_stars_mass_ssp_'+str(iii)] = trylog10(final_ML_totM[order][iii])
-        				tbhdu.header['HIERARCH remnant_mass_ssp_'+str(iii)] = trylog10(final_ML_alive[order][iii])
+        				tbhdu.header['HIERARCH total_mass_ssp_'+str(iii)] = trylog10(mass_per_ssp[order][iii])
+					tbhdu.header['HIERARCH stellar_mass_ssp_'+str(iii)] = trylog10(final_ML_alive[order][iii]+final_ML_wd[order][iii]+final_ML_ns[order][iii]+final_ML_bh[order][iii])
+					tbhdu.header['HIERARCH living_stars_mass_ssp_'+str(iii)] = trylog10(final_ML_alive[order][iii])	
+					tbhdu.header['HIERARCH remnant_mass_ssp_'+str(iii)] = trylog10(final_ML_wd[order][iii]+final_ML_ns[order][iii]+final_ML_bh[order][iii])
         				tbhdu.header['HIERARCH remnant_mass_in_whitedwarfs_ssp_'+str(iii)] = trylog10(final_ML_wd[order][iii])
         				tbhdu.header['HIERARCH remnant_mass_in_neutronstars_ssp_'+str(iii)] = trylog10(final_ML_ns[order][iii])
         				tbhdu.header['HIERARCH remnant_mass_in_blackholes_ssp_'+str(iii)] = trylog10(final_ML_bh[order][iii])
@@ -673,9 +687,9 @@ class StellarPopulationModel:
 		tbhdu.header['HIERARCH metallicity_massW']     = default_value
 		tbhdu.header['HIERARCH metallicity_massW_up']  = default_value
 		tbhdu.header['HIERARCH metallicity_massW_low'] = default_value
-		tbhdu.header['HIERARCH stellar_mass']      = default_value
-		tbhdu.header['HIERARCH stellar_mass_up']   = default_value
-		tbhdu.header['HIERARCH stellar_mass_low']  = default_value
+		tbhdu.header['HIERARCH total_mass']      = default_value
+		tbhdu.header['HIERARCH total_mass_up']   = default_value
+		tbhdu.header['HIERARCH total_mass_low']  = default_value
 		tbhdu.header['HIERARCH EBV']                   = default_value
 		tbhdu.header['HIERARCH ssp_number']            = default_value
 		return tbhdu
