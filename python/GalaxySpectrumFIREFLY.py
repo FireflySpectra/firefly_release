@@ -341,6 +341,45 @@ class GalaxySpectrumFIREFLY:
 				self.ebv_mw = get_dust_radec(ra,dec,'ebv')
 			else:
 				self.ebv_mw = 0.0
+				
+	def stack_no_lines(self, redshift = 0.85, fluxKeyword='medianWeightedStack'):
+			#for use with stacked spectra with removed emission lines
+		#created for stacked eBOSS spectra with emission lines removed with DAP 
+
+			self.hdulist = pyfits.open(self.path_to_spectrum)
+			self.ra = 0. #self.hdulist[0].header['RA']
+			self.dec = 0. #self.hdulist[0].header['DEC']
+			self.redshift = 0
+			self.restframe_wavelength = self.hdulist[1].data
+			self.wavelength = self.restframe_wavelength * (1. + self.redshift)
+
+			meanWL = (self.wavelength[1:]+self.wavelength[:-1])/2.
+			deltaWL = self.wavelength[1:]-self.wavelength[:-1]
+			resolution = np.ones_like(self.wavelength)*np.mean(meanWL / deltaWL)
+
+			self.flux = self.hdulist[2].data #* 10**(-17)
+			self.error = self.hdulist[3].data #* 10**(-17)
+			self.bad_flags = np.ones(len(self.restframe_wavelength))
+			#lines_mask = ((self.restframe_wavelength > 3728 - self.N_angstrom_masked) & (self.restframe_wavelength < 3728 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 5007 - self.N_angstrom_masked) & (self.restframe_wavelength < 5007 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 4861 - self.N_angstrom_masked) & (self.restframe_wavelength < 4861 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 6564 - self.N_angstrom_masked) & (self.restframe_wavelength < 6564 + self.N_angstrom_masked)) 
+			lines_mask = np.full(len(self.wavelength), False, dtype=bool)
+			self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
+			self.wavelength = self.wavelength[(lines_mask==False)] 
+			influx = self.flux[(lines_mask==False)] 
+			inerror = self.error[(lines_mask==False)] 
+			inbad_flags = self.bad_flags[(lines_mask==False)] 		
+			self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
+			self.r_instrument = resolution[(lines_mask==False)] 
+
+			self.vdisp = self.hdulist[4].data[0] # km/s
+
+			self.trust_flag = 1
+			self.objid = 0
+
+			if self.milky_way_reddening :
+		    # gets the amount of MW reddening on the models
+				self.ebv_mw = get_dust_radec(self.ra,self.dec,'ebv')
+			else:
+				self.ebv_mw = 0.0
 
 #--------------------Under development
 
