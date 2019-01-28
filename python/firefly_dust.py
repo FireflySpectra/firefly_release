@@ -317,18 +317,28 @@ def reddening_fm(wave, ebv=None, a_v=None, r_v=3.1, model='f99'):
 #    return (k+r_v) / r_v # debug
 
 def dust_calzetti_py(ebv,lam):
-
-	output = []
-	for i in lam:
-		l = i / 10000.0 #converting from angstrom to micrometers
-		if (l >= 0.63 and l<= 2.2):
-			k=(2.659*(-1.857+1.040/l)+4.05)
-		if (l < 0.63):
-			k= (2.659*(-2.156+1.509/l-0.198/l**2+0.011/l**3)+4.05)
-		if (l > 2.2):
-			k= 0.0
-
-		output.append(10**(-0.4 * ebv * k))
+	"""
+	Returns the Calzetti extinction for a given E(B-V) and a wavelength array
+	"""
+	l = lam/10000.
+	k = np.zeros_like(lam)
+	s1 = (l >= 0.63) & (l<= 2.2)
+	k[s1] = 2.659*(-1.857+1.040/l[s1])+4.05
+	s2 = (l < 0.63)
+	k[s2] = 2.659*(-2.156+1.509/l[s2]-0.198/l[s2]**2+0.011/l[s2]**3)+4.05
+	#s3 = (l > 2.2)
+	#k[s1] = 0.0
+	#output = []
+	#for i in lam:
+		#l = i / 10000.0 #converting from angstrom to micrometers
+		#if (l >= 0.63 and l<= 2.2):
+			#k= 2.659*(-1.857+1.040/l[s1])+4.05
+		#if (l < 0.63):
+			#k= (2.659*(-2.156+1.509/l-0.198/l**2+0.011/l**3)+4.05)
+		#if (l > 2.2):
+			#k= 0.0
+		#output.append(10**(-0.4 * ebv * k))
+	output = 10**(-0.4 * ebv * k)	
 	return output
 
 

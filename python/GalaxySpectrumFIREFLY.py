@@ -22,24 +22,11 @@ import astropy.io.fits as pyfits
 import glob
 import sys,os
 from firefly_dust import get_dust_radec
-import cmath
+
 import astropy.cosmology as cc
-import astropy.units as uu
-
 cosmo = cc.Planck13
-
-def remove_bad_data(influx, inerror, inbad_flags):
-	new_flux = influx
-	new_error = inerror
-	new_bad_flags = inbad_flags
-	
-	bad_data = np.isnan(influx) | np.isinf(influx) | (influx <= 0.0) \
-	    | np.isnan(inerror) | np.isinf(inerror)
-	if (len(bad_data) > 0): # removes the bad data from the spectrum
-		new_flux[bad_data] 	= 0.0
-		new_error[bad_data] 	= np.max(influx) * 99999999999.9
-		new_bad_flags[bad_data] = 0
-	return new_flux, new_error, new_bad_flags
+import astropy.units as uu
+import cmath
 
 class GalaxySpectrumFIREFLY:
 	"""
@@ -90,6 +77,8 @@ class GalaxySpectrumFIREFLY:
 			* bad_flags : ones as long as the wavelength array, filters the pixels with bad data
 			* objid : object id optional : set to 0
 		"""
+		maskLambda = np.loadtxt(os.path.join(os.environ['GIT_FF'],'data',"dr12-sky-mask.txt"), unpack=True)
+
 		self.hdulist = pyfits.open(self.path_to_spectrum)
 		self.ra = self.hdulist[0].header['RA']
 		self.dec = self.hdulist[0].header['DEC']
@@ -111,17 +100,26 @@ class GalaxySpectrumFIREFLY:
 		self.trust_flag = 1
 		self.objid = 0
 
+		ratio = np.min(abs(10000.*np.log10(np.outer(self.wavelength, 1./maskLambda))), axis=1)
+		margin = 1.5
+		vet_mask = ratio <= margin
+		
 		# masking emission lines
-		lines_mask = ((self.restframe_wavelength > 3728 - self.N_angstrom_masked) & (self.restframe_wavelength < 3728 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 5007 - self.N_angstrom_masked) & (self.restframe_wavelength < 5007 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 4861 - self.N_angstrom_masked) & (self.restframe_wavelength < 4861 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 6564 - self.N_angstrom_masked) & (self.restframe_wavelength < 6564 + self.N_angstrom_masked)) 
+		lines_mask = ((self.restframe_wavelength > 3728 - self.N_angstrom_masked) & (self.restframe_wavelength < 3728 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 5007 - self.N_angstrom_masked) & (self.restframe_wavelength < 5007 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 4861 - self.N_angstrom_masked) & (self.restframe_wavelength < 4861 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 6564 - self.N_angstrom_masked) & (self.restframe_wavelength < 6564 + self.N_angstrom_masked)) #| (self.restframe_wavelength<3900) | (self.restframe_wavelength>6800)
 
-		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
-		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
+		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)&(vet_mask==False)] 
+		self.wavelength = self.wavelength[(lines_mask==False)&(vet_mask==False)] 
+		self.flux = self.flux[(lines_mask==False)&(vet_mask==False)] 
+		self.error = self.error[(lines_mask==False)&(vet_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)&(vet_mask==False)] 		
+		
+		bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
+		# removes the bad data from the spectrum 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
+
 		self.r_instrument = np.zeros(len(self.wavelength))
-
 		for wi,w in enumerate(self.wavelength):
 			if w<6000:
 				self.r_instrument[wi] = (2270.0-1560.0)/(6000.0-3700.0)*w + 420.0 
@@ -134,6 +132,7 @@ class GalaxySpectrumFIREFLY:
 			self.ebv_mw = get_dust_radec(self.ra,self.dec,'ebv')
 		else:
 			self.ebv_mw = 0.0
+
 
 
 	def openObservedDEEP2pectrum(self, catalog_entry, survey='deep2_ascii'):
@@ -186,10 +185,15 @@ class GalaxySpectrumFIREFLY:
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
+		self.flux = self.flux[(lines_mask==False)] 
+		self.error = self.error[(lines_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)] 		
+		
+		bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
+		# removes the bad data from the spectrum 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
 
 		self.r_instrument = np.zeros(len(self.wavelength))
 		for wi,w in enumerate(self.wavelength):
@@ -285,10 +289,15 @@ class GalaxySpectrumFIREFLY:
 		resolution = np.ones_like(wavelength)*np.mean(meanWL / deltaWL)
 		vdisp  = hdulist[0].header['VELDISP']
 
-		influx = hdulist[0].data
-		inerror = np.zeros(len(influx))
-		inbad_flags = np.ones(len(restframe_wavelength))
-		flux, error, bad_flags = remove_bad_data(influx, inerror, inbad_flags)
+		flux = hdulist[0].data
+		error = np.zeros(len(flux))
+		bad_flags = np.ones(len(restframe_wavelength))
+
+		bad_data = np.isnan(flux) | np.isinf(flux) | (flux <= 0.0) | np.isnan(error) | np.isinf(error)
+		# removes the bad data from the spectrum 
+		flux[bad_data] = 0.0
+		error[bad_data] = np.max(flux) * 99999999999.9
+		bad_flags[bad_data] = 0
 		
 		#import matplotlib.pyplot as plt
 		#plt.plot(wavelength, flux, 'r')
@@ -325,12 +334,17 @@ class GalaxySpectrumFIREFLY:
 			resolution = np.ones_like(wavelength)*np.mean(meanWL / deltaWL)
 			vdisp  = hdulist[0].header['VELDISP']
 
-			influx = hdulist[0].data
-			influx = influx.flatten()
-			inerror = hdulist[1].data
-			inerror = inerror.flatten()
-			inbad_flags = np.ones(len(restframe_wavelength))
-			flux, error, bad_flags = remove_bad_data(influx, inerror, inbad_flags)
+			flux = hdulist[0].data
+			flux = flux.flatten()
+			error = hdulist[1].data
+			error = error.flatten()
+			bad_flags = np.ones(len(restframe_wavelength))
+	
+			bad_data = np.isnan(flux) | np.isinf(flux) | (flux <= 0.0) | np.isnan(error) | np.isinf(error) 
+			# removes the bad data from the spectrum 
+			flux[bad_data] = 0.0
+			error[bad_data] = np.max(flux) * 99999999999.9
+			bad_flags[bad_data] = 0
 
 			self.xpos, self.ypos, self.redshift, self.restframe_wavelength, self.wavelength = ra, dec, redshift, restframe_wavelength, wavelength
 			self.flux, self.error, self.bad_flags, self.r_instrument, self.vdisp = flux, error, bad_flags, resolution, vdisp
@@ -371,11 +385,15 @@ class GalaxySpectrumFIREFLY:
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
+		self.flux = self.flux[(lines_mask==False)] 
+		self.error = self.error[(lines_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)] 		
+		
+		bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
+		# removes the bad data from the spectrum 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
 
 		self.r_instrument = np.zeros(len(self.wavelength))
 		for wi,w in enumerate(self.wavelength):
@@ -415,11 +433,15 @@ class GalaxySpectrumFIREFLY:
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
+		self.flux = self.flux[(lines_mask==False)] 
+		self.error = self.error[(lines_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)] 		
+		
+		bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
+		# removes the bad data from the spectrum 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
 
 		self.r_instrument = np.zeros(len(self.wavelength))
 		for wi,w in enumerate(self.wavelength):
@@ -457,13 +479,16 @@ class GalaxySpectrumFIREFLY:
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
-
+		self.flux = self.flux[(lines_mask==False)] 
+		self.error = self.error[(lines_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)] 
 		self.r_instrument = resolution[(lines_mask==False)] 
+
+		bad_data 	= np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error) 
+		# removes the bad data from the spectrum 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
 		
 		self.vdisp = 70. # km/s
 
@@ -519,13 +544,16 @@ class GalaxySpectrumFIREFLY:
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
-
+		self.flux = self.flux[(lines_mask==False)] 
+		self.error = self.error[(lines_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)] 
 		self.r_instrument = resolution[(lines_mask==False)] 
+
+		bad_data 	= np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error) 
+		# removes the bad data from the spectrum 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
 		
 		self.vdisp = 70. # km/s
 
@@ -560,11 +588,16 @@ class GalaxySpectrumFIREFLY:
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
+		self.flux = self.flux[(lines_mask==False)] 
+		self.error = self.error[(lines_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)] 
 		self.r_instrument = resolution[(lines_mask==False)] 
+
+		bad_data 	= np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error) 
+		# removes the bad data from the spectrum 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
 		
 		self.vdisp = 70. # km/s
 
@@ -612,12 +645,17 @@ class GalaxySpectrumFIREFLY:
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
-		self.r_instrument = np.zeros(len(self.wavelength))
+		self.flux = self.flux[(lines_mask==False)] 
+		self.error = self.error[(lines_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)] 		
+		
+		bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
+		# removes the bad data from the spectrum 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
 
+		self.r_instrument = np.zeros(len(self.wavelength))
 		for wi,w in enumerate(self.wavelength):
 			self.r_instrument[wi] = 220.
 
@@ -663,12 +701,17 @@ class GalaxySpectrumFIREFLY:
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
-		self.r_instrument = np.zeros(len(self.wavelength))
+		self.flux = self.flux[(lines_mask==False)] 
+		self.error = self.error[(lines_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)] 
+		
+		bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
+
+		self.r_instrument = np.zeros(len(self.wavelength))
 		for wi,w in enumerate(self.wavelength):
 			self.r_instrument[wi] = 220.
 
@@ -683,10 +726,14 @@ class GalaxySpectrumFIREFLY:
 		:param catalog: name of the catalog with redshifts.
 		"""
 		self.wavelength, flA, flErrA = np.loadtxt(self.path_to_spectrum, unpack=True)
-		influx, inerror = flA*1e-3, flErrA*1e-3 # units of 1e-17
-		inbad_flags = np.ones(len(self.wavelength))
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
-
+		self.flux, self.error = flA*1e-3, flErrA*1e-3 # units of 1e-17
+		self.bad_flags = np.ones(len(self.wavelength))
+		bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
+		# removes the bad data from the spectrum 
+		self.flux[bad_data] 	= 0.0
+		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
+		self.bad_flags[bad_data] = 0
+		
 		self.redshift = catalog['FINAL_Z']
 		self.vdisp = 100 # catalog['VDISP']
 		self.restframe_wavelength = self.wavelength / (1.0+self.redshift)
@@ -696,10 +743,9 @@ class GalaxySpectrumFIREFLY:
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)] 
-		influx = self.flux[(lines_mask==False)] 
-		inerror = self.error[(lines_mask==False)] 
-		inbad_flags = self.bad_flags[(lines_mask==False)] 		
-		self.flux, self.error, self.bad_flags = remove_bad_data(influx, inerror, inbad_flags)
+		self.flux = self.flux[(lines_mask==False)] 
+		self.error = self.error[(lines_mask==False)] 
+		self.bad_flags = self.bad_flags[(lines_mask==False)] 	
 		
 		self.r_instrument = np.zeros(len(self.wavelength))
 		for wi,w in enumerate(self.wavelength):
@@ -718,13 +764,11 @@ class GalaxySpectrumFIREFLY:
 		else:
 			self.ebv_mw = 0.
 
-
-
 	def openSAMIgalaxy(self, xposition, yposition):
 
 		from astropy.io import fits
 		header = fits.open(self.path_to_spectrum)
-		#print header['PRIMARY'].header
+		#print( header['PRIMARY'].header)
 		stop
 
 		# Open up the header to get key information to construct wavelength vector.
@@ -733,18 +777,19 @@ class GalaxySpectrumFIREFLY:
 		wavelength = np.arange(naxis)*cdelt+crval
 
 		# Now open up the flux and variance for an arbitrary spaxel. Use the variance to get error spectrum.
-		influx, variance = header['PRIMARY'].data[:,xposition,yposition], header['VARIANCE'].data[:,xposition,yposition]
-		inerror = np.sqrt(variance)
+		flux, variance = header['PRIMARY'].data[:,xposition,yposition], header['VARIANCE'].data[:,xposition,yposition]
+		error = np.sqrt(variance)
 
 		# Redshift, sigma etc.
 		redshift, ra, dec = 0.050,214.36654,0.48281
 		restframe_wavelength = wavelength/(1+redshift)
 		vdisp = 100
 
-		inbad_flags = np.ones(len(restframe_wavelength))
-
-		flux, error, bad_flags = remove_bad_data(influx, inerror, inbad_flags)
-
+		bad_flags = np.ones(len(restframe_wavelength))
+		bad_data = np.isnan(flux) | np.isinf(flux) | (flux <= 0.0) | np.isnan(error) | np.isinf(error)
+		flux[bad_data] = 0.0
+		error[bad_data] = np.max(flux) * 99999999999.9
+		bad_flags[bad_data] = 0
 		resolution = np.ones_like(wavelength)*1700
 
 		self.xpos, self.ypos, self.redshift, self.restframe_wavelength, self.wavelength = ra, dec, redshift, restframe_wavelength, wavelength
@@ -760,5 +805,3 @@ class GalaxySpectrumFIREFLY:
 			self.ebv_mw = get_dust_radec(ra,dec,'ebv')
 		else:
 			self.ebv_mw = 0.0
-
-

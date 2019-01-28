@@ -20,8 +20,8 @@ def runSpec(specLiteFile):
 	mjd   = baseN[2]
 	fibre, dum = os.path.basename(baseN[3]).split('.')
 	# This needs to be changed to your own directory
-	outputFolder = join(os.environ['EBOSSDR16_DIR'],'firefly',plate)
-	output_file = join(outputFolder , 'spFly-' + os.path.basename(specLiteFile)[5:-5] )+".fits"
+	outputFolder = join( os.environ['EBOSSDR16_DIR'], 'firefly', plate)
+	output_file = join( outputFolder , 'spFly-' + os.path.basename( specLiteFile )[5:-5] ) + ".fits"
 	if os.path.isfile(output_file):
 		print('already done', time.time()-t0)
 		return 0.
@@ -32,9 +32,9 @@ def runSpec(specLiteFile):
 	spec=gs.GalaxySpectrumFIREFLY(specLiteFile, milky_way_reddening=True)
 	spec.openObservedSDSSSpectrum(survey='sdss4')
 
-	ageMin = 0. ; ageMax = 15.
+	ageMin = 0. ; ageMax = 20.
 	ZMin = 0.001 ; ZMax = 4.
-	if spec.hdulist[2].data['CLASS'][0]=="GALAXY" and spec.hdulist[2].data['Z'][0] >  spec.hdulist[2].data['Z_ERR'][0] and spec.hdulist[2].data['Z_ERR'][0]>0 and spec.hdulist[2].data['ZWARNING'][0] ==0 :
+	if spec.hdulist[2].data['CLASS'][0]=="GALAXY" and spec.hdulist[2].data['Z'][0] >  spec.hdulist[2].data['Z_ERR'][0] and spec.hdulist[2].data['Z_ERR'][0]>0 and (( spec.hdulist[2].data['ZWARNING'][0] ==0 ) | (spec.hdulist[2].data['ZWARNING'][0] ==4)) :
 		print( 'Output file:'              )
 		print( output_file                 )
 		print( "--------------------------")
@@ -65,15 +65,16 @@ def runSpec(specLiteFile):
 		except (ValueError):
 			tables.append( model_1.create_dummy_hdu() )
 			did_not_converged +=1
+			print('did not converge')
 
-		#try :
-			#model_1 = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, model_libs = ['ELODIE'], imfs = ['cha'], age_limits = [ageMin,ageMax], downgrade_models = False, data_wave_medium = 'vacuum', Z_limits = [ZMin,ZMax], use_downgraded_models = False, write_results = False)
-			#model_1.fit_models_to_data()
-			#tables.append( model_1.tbhdu )
-			#print( "m2", time.time()-t0 )
-		#except (ValueError):
-			#tables.append( model_1.create_dummy_hdu() )
-			#did_not_converged +=1
+		try :
+			model_1 = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, model_libs = ['ELODIE'], imfs = ['cha'], age_limits = [ageMin,ageMax], downgrade_models = False, data_wave_medium = 'vacuum', Z_limits = [ZMin,ZMax], use_downgraded_models = False, write_results = False)
+			model_1.fit_models_to_data()
+			tables.append( model_1.tbhdu )
+			print( "m2", time.time()-t0 )
+		except (ValueError):
+			tables.append( model_1.create_dummy_hdu() )
+			did_not_converged +=1
 
 		#try :
 			#model_1 = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, model_libs = ['STELIB'], imfs = ['cha'], age_limits = [ageMin,ageMax], downgrade_models = False, data_wave_medium = 'vacuum', Z_limits = [ZMin,ZMax], use_downgraded_models = False, write_results = False)
@@ -99,11 +100,11 @@ def runSpec(specLiteFile):
 		return 0., 0.
 
 
-def main():
+#def main():
 # Get argument from file
-	file_name = sys.argv[1]
-	print( file_name)
-	# Make sure output is in correct place.
-	spec_class, model_class = runSpec(file_name)
+file_name = sys.argv[1]
+print( file_name)
+# Make sure output is in correct place.
+spec_class, model_class = runSpec(file_name)
 
-main()
+#main()
