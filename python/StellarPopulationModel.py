@@ -93,10 +93,8 @@ class StellarPopulationModel:
 		 #. Optionally produces a plot
 		 #. Finally, it writes the output files
 
-
-
 	"""
-	def __init__(self, specObs, outputFile, cosmo, models = 'm11', model_libs = ['MILES_UVextended'], imfs = ['ss','kr'], hpf_mode = 'on', age_limits = [6,10.1], downgrade_models = True, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 10, fit_per_iteration_cap = 1000, pdf_sampling = 300, data_wave_medium = 'vacuum', Z_limits = [-0.1,0.1], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
+	def __init__(self, specObs, outputFile, cosmo, models = 'm11', model_libs = ['MILES_UVextended'], imfs = ['ss','kr'], hpf_mode = 'on', age_limits = [6,10.1], downgrade_models = True, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 10, fit_per_iteration_cap = 3, pdf_sampling = 300, data_wave_medium = 'vacuum', Z_limits = [-0.1,0.1], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
 		self.cosmo = cosmo
 		self.specObs = specObs
 		self.outputFile = outputFile
@@ -418,6 +416,7 @@ class StellarPopulationModel:
 				model_flux, mass_factors = normalise_spec(data_flux, model_flux_atten)
 				print('dust done, Dt=', time.time()-t_i,'seconds')
 				# 4. Fits the models to the data
+				self.fit_per_iteration_cap = 1000
 				light_weights, chis, branch = fitter(wave, data_flux, error_flux, model_flux, self)
 				print('fitting done, Dt=', time.time()-t_i,'seconds')
 
@@ -442,7 +441,7 @@ class StellarPopulationModel:
 				hpf_models,mass_factors = normalise_spec(hpf_data,hpf_models)
 				print('dust done, Dt=', time.time()-t_i,'seconds')
 				# 4. Fits the models to the data
-				light_weights, chis, branch = fitter(wave, hpf_data,hpf_error, hpf_models, self)
+				light_weights, chis, branch = fitter(wave, hpf_data, hpf_error, hpf_models, self)
 				print('fitting done, Dt=', time.time()-t_i,'seconds')
 
 			print('Gets the best model, Dt=', time.time()-t_i,'seconds')

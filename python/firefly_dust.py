@@ -729,7 +729,18 @@ def unred(wave, ebv, R_V=3.1, LMC2=False, AVGLMC=False):
 
 def hpf(flux, windowsize=20, w_start=20):
 	"""
-	What does this one do ? High pass filtering ?
+	Fourier transforms the flux array: h = FFT(flux)
+	Multiplies by the window function : 
+	 - zeros until w_start
+	 - then increasing to reach 1 
+	 - then decreasing to reach 0 at index N-w_start
+	The high pass filtered flux is then obtained by 
+	flux_hpf = real(iFFT(h x window))
+	
+	returns a median filtered version of the flux_hpf for further computations
+	
+	
+	
 	"""
 	D = np.size(flux)
 	#w_start = w_start
@@ -816,7 +827,7 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 	hpf_models,mass_factors = normalise_spec(hpf_data,hpf_models)
 	print('normalization', time.time()-t_i)
 	# 3. fits the hpf models to data : chi2 maps
-	hpf_weights,hpf_chis,hpf_branch = fitter(wave,hpf_data,hpf_error, hpf_models , SPM )
+	hpf_weights, hpf_chis, hpf_branch = fitter(wave,hpf_data,hpf_error, hpf_models , SPM )
 	print('fitting EBV', time.time()-t_i)
 	# 4. use best fit to determine the attenuation curve : fine_attenuation
 	best_fit_index  = [np.argmin(hpf_chis)]

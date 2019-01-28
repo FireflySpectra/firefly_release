@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import sigmaclip
 import copy
+import time
 
 def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 
@@ -148,11 +149,9 @@ def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 		return diff
 	
 	def iterate(fit_list):
-
 		global iterate_count		
 		iterate_count += 1
 		# print "Iteration step: "+str(iterate_count)
-
 		count_new = 0
 
 		len_list = len(copy.copy(fit_list))
@@ -229,9 +228,12 @@ def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 
 
 	# print "Initiating fits..."
+	t_i = time.time()
+	print('fitting starts', t_i)
 	for im in range(len(models)):
 		zero_weights[im]+= 1
 		fit_first = fit(copy.copy(zero_weights),0)
+		print('fit n=', im,', dt= ', time.time()-t_i)
 		fit_list.append(fit_first)
 		int_chi.append(fit_first.chi_squared)
 		zero_weights[im]-= 1
@@ -240,18 +242,17 @@ def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 	global clipped_arr
 
 	clipped_arr = fit_list[np.argmin(int_chi)].clipped_arr
-
+	print('array clipped', time.time()-t_i)
 	# Fit_list is our initial guesses from which we will iterate
 	# print "Calculated initial chi-squared values."
 	# print "Begin iterative process."
-
-	
-
-
 	final_fit_list = iterate(fit_list)
+	print('iterated', time.time()-t_i)
 	junk,chis,more_junk = retrieve_properties(final_fit_list)
+	print('retrieve_properties', time.time()-t_i)
 
 	best_fits = np.argsort(chis)	
+	print('sort', time.time()-t_i)
 
 	# print "Best chi (raw, reduced) is:"
 	# print min(chis)
@@ -262,8 +263,10 @@ def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 	extra_fit_list 		= mix(np.asarray(final_fit_list)[best_fits[:bf]].tolist(),final_fit_list,np.min(chis))
 	total_fit_list 		= final_fit_list+extra_fit_list
 	#junk,chis,more_junk = retrieve_properties(total_fit_list)
-
-	return retrieve_properties(total_fit_list)
+	print('final', time.time()-t_i)
+	output = retrieve_properties(total_fit_list)	
+	print('output', time.time()-t_i)
+	return output
 
 
 
