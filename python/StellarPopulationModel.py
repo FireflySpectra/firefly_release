@@ -24,6 +24,7 @@ It gathers all inputs : from the model and from the data.
 	from firefly_library import *
 
 """
+import time
 import numpy as np
 import astropy.io.fits as pyfits
 import astropy.units as u
@@ -376,12 +377,13 @@ class StellarPopulationModel:
 		 #. matches the model and data to the same resolution
 		 #. normalises the spectra
 		"""
+		t_i = time.time()
+		print( "getting the models, t=", t_i )
 		for mi,mm in enumerate(self.model_libs):
 			# loop over the models
 			for ii in self.imfs:
 				# loop over the IMFs
 				# A. gets the models
-				#print( "getting the models" )
 				deltal = self.deltal_libs[mi]
 				model_wave_int, model_flux_int, age, metal = self.get_model( mm, ii, deltal, self.specObs.vdisp, self.specObs.restframe_wavelength, self.specObs.r_instrument, self.specObs.ebv_mw)
 				# B. matches the model and data to the same resolution
@@ -391,9 +393,9 @@ class StellarPopulationModel:
 				self.raw_model_flux_int = model_flux_int
 				self.raw_age = age
 				self.raw_metal = metal
-				print(len(model_wave_int), len(model_flux_int), len(age), len(metal))
+				#print(len(model_wave_int), len(model_flux_int), len(age), len(metal))
 				wave, data_flux, error_flux, model_flux_raw = match_data_models( self.specObs.restframe_wavelength, self.specObs.flux, self.specObs.bad_flags, self.specObs.error, model_wave_int, model_flux_int, self.wave_limits[0], self.wave_limits[1], saveDowngradedModel = False)
-				print("model: w,f,fe,fr", len(wave), len(data_flux), len(error_flux), len(model_flux_raw))
+				#print("model: w,f,fe,fr", len(wave), len(data_flux), len(error_flux), len(model_flux_raw))
 				self.matched_wave = model_wave_int
 				self.matched_model_flux_raw = model_flux_raw
 				# C. normalises the models to the median value of the model [erg/s/A/Msun]
@@ -403,17 +405,21 @@ class StellarPopulationModel:
 				self.matched_mass_factors = mass_factors
 
 			# 3. Corrects from dust attenuation
+			print('Corrects from dust attenuation and fitting, Dt=', time.time()-t_i,'seconds')
 			if self.hpf_mode=='on':
 				# 3.1. Determining attenuation curve through HPF fitting, apply attenuation curve to models and renormalise spectra
 				best_ebv, attenuation_curve = determine_attenuation(wave, data_flux, error_flux, model_flux, self, age, metal)
 				self.attenuation_curve = attenuation_curve
-				model_flux_atten = np.zeros(np.shape(model_flux_raw))
-				for m in range(len(model_flux_raw)):
-					model_flux_atten[m] = attenuation_curve * model_flux_raw[m]
+				#model_flux_atten = np.zeros(np.shape(model_flux_raw))
+				#for m in range(len(model_flux_raw)):
+					#model_flux_atten[m] = attenuation_curve * model_flux_raw[m]
+				model_flux_atten = np.array([ attenuation_curve * model_flux_raw[m] for m in range(len(model_flux_raw)) ])
 
 				model_flux, mass_factors = normalise_spec(data_flux, model_flux_atten)
+				print('dust done, Dt=', time.time()-t_i,'seconds')
 				# 4. Fits the models to the data
 				light_weights, chis, branch = fitter(wave, data_flux, error_flux, model_flux, self)
+				print('fitting done, Dt=', time.time()-t_i,'seconds')
 
 			elif self.hpf_mode == 'hpf_only':
 
@@ -434,9 +440,12 @@ class StellarPopulationModel:
 
 				best_ebv = 0.0
 				hpf_models,mass_factors = normalise_spec(hpf_data,hpf_models)
+				print('dust done, Dt=', time.time()-t_i,'seconds')
 				# 4. Fits the models to the data
 				light_weights, chis, branch = fitter(wave, hpf_data,hpf_error, hpf_models, self)
+				print('fitting done, Dt=', time.time()-t_i,'seconds')
 
+			print('Gets the best model, Dt=', time.time()-t_i,'seconds')
 			# 5. Get mass-weighted SSP contributions using saved M/L ratio.
 			unnorm_mass, mass_weights = light_weights_to_mass(light_weights, mass_factors)
 			# print "Fitting complete"
@@ -587,8 +596,8 @@ class StellarPopulationModel:
 				#best_fitCol = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit)
 				waveCol_um = pyfits.Column(name="wavelength",format="D", unit="Angstrom", array= model_wave_int)
 				best_fitCol_um = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit_full)
-				best_fitCol_um = pyfits.Column(name="firefly_model_noHPF",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit_full_noHPF)
-				cols = pyfits.ColDefs([  waveCol_um, best_fitCol_um]) # dataCol, errorCol, waveCol, best_fitCol,
+				best_fitCol_um_noHPF = pyfits.Column(name="firefly_model_noHPF",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit_full_noHPF)
+				cols = pyfits.ColDefs([  waveCol_um, best_fitCol_um, best_fitCol_um_noHPF]) # dataCol, errorCol, waveCol, best_fitCol,
 				tbhdu = pyfits.BinTableHDU.from_columns(cols)
 				#tbhdu.header['HIERARCH age_universe (Gyr)'] = trylog10(self.cosmo.age(self.specObs.redshift).value*10**9)
 				tbhdu.header['HIERARCH redshift'] = self.specObs.redshift
