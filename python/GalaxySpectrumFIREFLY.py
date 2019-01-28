@@ -24,7 +24,7 @@ import sys,os
 from firefly_dust import get_dust_radec
 
 import astropy.cosmology as cc
-cosmo = cc.Planck13
+cosmo = cc.Planck15
 import astropy.units as uu
 import cmath
 
