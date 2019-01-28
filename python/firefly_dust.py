@@ -805,30 +805,30 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 	"""
 	# 1. high pass filters the data and the models
 	t_i = time.time()
-	print('start dust determination', t_i)
+	#print('start dust determination', t_i)
 	smoothing_length = SPM.dust_smoothing_length
-	print('smoothing done', time.time()-t_i)
+	#print('smoothing done', time.time()-t_i)
 	hpf_data    = hpf(data_flux)
-	print('hpf done', time.time()-t_i)
+	#print('hpf done', time.time()-t_i)
 	hpf_models  = np.zeros(np.shape(model_flux))
 	for m in range(len(model_flux)):
 		hpf_models[m] = hpf(model_flux[m])
-	print('propagated to models done', time.time()-t_i)
+	#print('propagated to models done', time.time()-t_i)
 
 	zero_dat = np.where( (np.isnan(hpf_data)) & (np.isinf(hpf_data)) )
 	hpf_data[zero_dat] = 0.0
 	for m in range(len(model_flux)):
 		hpf_models[m,zero_dat] = 0.0
-	print('nans=>0', time.time()-t_i)
+	#print('nans=>0', time.time()-t_i)
 	hpf_error    = np.zeros(len(error_flux))
 	hpf_error[:] = np.median(error_flux)/np.median(data_flux) * np.median(hpf_data)
 	hpf_error[zero_dat] = np.max(hpf_error)*999999.9
 	# 2. normalises the hpf_models to the median hpf_data
 	hpf_models,mass_factors = normalise_spec(hpf_data,hpf_models)
-	print('normalization', time.time()-t_i)
+	#print('normalization', time.time()-t_i)
 	# 3. fits the hpf models to data : chi2 maps
 	hpf_weights, hpf_chis, hpf_branch = fitter(wave,hpf_data,hpf_error, hpf_models , SPM )
-	print('fitting EBV', time.time()-t_i)
+	#print('fitting EBV', time.time()-t_i)
 	# 4. use best fit to determine the attenuation curve : fine_attenuation
 	best_fit_index  = [np.argmin(hpf_chis)]
 	best_fit_hpf    = np.dot(hpf_weights[best_fit_index],hpf_models)[0]
@@ -838,14 +838,14 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 	fine_attenuation[bad_atten] = 1.0
 	hpf_error[bad_atten] = np.max(hpf_error)*9999999999.9 
 	fine_attenuation= fine_attenuation / np.median(fine_attenuation)
-	print('finalize EBV', time.time()-t_i)
+	#print('finalize EBV', time.time()-t_i)
 	# 5. propagates the hpf to the age and metallicity estimates
 	av_age_hpf      = np.dot(hpf_weights,age)
 	av_metal_hpf    = np.dot(hpf_weights,metal)
-	print('get age, metal', time.time()-t_i)
+	#print('get age, metal', time.time()-t_i)
 	# 6. smoothes the attenuation curve obtained
 	smooth_attenuation = curve_smoother(wave,fine_attenuation,smoothing_length)
-	print('smoothes distribution', time.time()-t_i)
+	#print('smoothes distribution', time.time()-t_i)
 
 	# Fit a dust attenuation law to the best fit attenuation.
 	if SPM.dust_law == 'calzetti':
@@ -914,7 +914,7 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 
 		dust_fit = ebv_arr[np.argmin(chi_dust)]
 
-	print('fits attenuation', time.time()-t_i)
-	# print "Best E(B-V) = "+str(dust_fit)
+	#print('fits attenuation', time.time()-t_i)
+	# #print "Best E(B-V) = "+str(dust_fit)
 	return dust_fit,smooth_attenuation
 
