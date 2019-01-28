@@ -3,12 +3,12 @@ from os.path import join
 import glob
 import numpy as n
 
-run_dir = '/home/comparat/software/linux/firefly_release/doc/run_dr16/'
+run_dir = '/home/comparat/software/linux/FireflySpectra/firefly_dev/doc/run_dr16/'
 
 def writeScript(plate, spec_files):
   f=open(run_dir + plate+".sh",'w')
   f.write("#!/bin/bash \n")
-  f.write("#SBATCH --partition=he2srvLowP \n")
+  f.write("#SBATCH --partition=he2srvHighP \n")
   f.write("#SBATCH --time=2000:00:00 \n")
   f.write("#SBATCH --nodes=1 \n")
   f.write("#SBATCH --ntasks=1 \n")
@@ -18,7 +18,7 @@ def writeScript(plate, spec_files):
   f.write(". /home_local/4FSOpsim/py36he2srv/bin/activate \n")
   f.write("export OMP_NUM_THREADS=1 \n")
   f.write(" \n")
-  f.write("cd /home/comparat/software/linux/firefly_release/doc \n")
+  f.write("cd /home/comparat/software/linux/FireflySpectra/firefly_dev/doc \n")
   f.write(" \n")
   for spec_file in spec_files:
     f.write("python one_spectra.py "+spec_file+" \n")
