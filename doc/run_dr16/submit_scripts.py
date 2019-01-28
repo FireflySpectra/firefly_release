@@ -1,7 +1,7 @@
 import os
 import glob
 import numpy as n
-import astropy.io.fits as fits
+#import astropy.io.fits as fits
 
 #d21 = fits.open('/data37s/SDSS/catalogs/ELG_Y1.eboss21.fits')[1].data
 #pl21 = n.array(list(set(d21['PLATE']))).astype('str')
@@ -13,7 +13,7 @@ import astropy.io.fits as fits
 #plates = n.hstack(( pl21, pl22, pl23 ))
 
 #scripts = n.array([pl+'.sh' for pl in plates ])
-scripts = glob.glob("*.sh")
+scripts = n.array(glob.glob("36*.sh"))
 scripts.sort()
 
 for script in scripts:

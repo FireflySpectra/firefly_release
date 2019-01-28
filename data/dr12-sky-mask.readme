@@ -1,0 +1,15 @@
+
+The dr12 sky mask lists observed-frame wavelengths (A) where the variance of the co-added sky-subtracted sky fibers is significantly higher than from the surrounding sky continuum. To use the mask, veto any pixels whose observed lambda satisfies
+
+It is a SDSS/BOSS/eBOSS Ly alpha product.
+
+The reference describing it is 
+Lee, Khee-Gan et al. 2012
+http://adsabs.harvard.edu/abs/2013AJ....145...69L
+
+for each lambda of the spectrum
+A margin of 1 corresponds to one co-added pixel. Use margin = 2 to add an extra pixel of padding.
+A recommended margin is 1.5.
+margin = 1.5
+selection = abs(10000.*n.log10(lambda/maskLambda)) <= margin
+
