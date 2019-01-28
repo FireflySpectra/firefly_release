@@ -8,7 +8,7 @@ if sys.version > '3':
 
 import numpy as np
 import copy
-import cPickle
+import pickle as cPickle
 from scipy.stats import chi2 
 
 

@@ -47,8 +47,8 @@ def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 
 	global num_models	
 	num_models 	= len(models)
-
 	num_wave 	= len(wavelength)
+	
 	global bic_n
 	bic_n = np.log(num_wave)
 
@@ -56,7 +56,7 @@ def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 	chi_models = np.zeros(np.shape(models))
 	for m in range(num_models):
 		chi_models[m] = (models[m]-data)/error
-
+	
 	class fit(object):
 
 		"""
