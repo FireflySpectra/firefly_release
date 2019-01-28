@@ -28,7 +28,7 @@ def writeScript(plate, spec_files):
 plates = n.loadtxt('/home/comparat/software/linux/firefly_release/doc/run_dr16/plate_list', unpack=True).astype('int').astype('str')
 
 for plate in plates:
-  spec_files = n.array(glob.glob(os.path.join(os.environ['EBOSSDR16_DIR'], plate, '*.fits')))
+  spec_files = n.array(glob.glob(os.path.join(os.environ['EBOSSDR16_DIR'], 'spectra', plate, '*.fits')))
   spec_files.sort()
   writeScript(plate, spec_files)
 
