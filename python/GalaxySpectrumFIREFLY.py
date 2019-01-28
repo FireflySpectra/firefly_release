@@ -119,13 +119,11 @@ class GalaxySpectrumFIREFLY:
 		self.error[bad_data] 	= np.max(self.flux) * 99999999999.9
 		self.bad_flags[bad_data] = 0
 
+		f_blue = lambda lll : (2270.0-1560.0)/(6000.0-3700.0)*lll + 420.0 
+		f_red  = lambda lll : (2650.0-1850.0)/(9000.0-6000.0)*lll + 250.0  
 		self.r_instrument = np.zeros(len(self.wavelength))
-		for wi,w in enumerate(self.wavelength):
-			if w<6000:
-				self.r_instrument[wi] = (2270.0-1560.0)/(6000.0-3700.0)*w + 420.0 
-			else:
-				self.r_instrument[wi] = (2650.0-1850.0)/(9000.0-6000.0)*w + 250.0 
-
+		self.r_instrument[(self.wavelength<6000.)] = f_blue(self.wavelength[(self.wavelength<6000.)])
+		self.r_instrument[(self.wavelength>=6000.)] = f_red(self.wavelength[(self.wavelength>=6000.)])		
 
 		if self.milky_way_reddening :
 			# gets the amount of MW reddening on the models
