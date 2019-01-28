@@ -4,10 +4,11 @@ import math
 import os
 import scipy.interpolate as interpolate
 from astropy.io import fits
+import time
 
-from firefly_fitter import *
-from firefly_library import *
-from firefly_instrument import *
+from firefly_fitter import fitter, sigmaclip
+from firefly_library import normalise_spec 
+#from firefly_instrument import *
 
 # Calzetti curves, and other general attenuation curves are computed
 # here, along with (in dust_calzetti) applying to spectra directly.
@@ -726,14 +727,12 @@ def unred(wave, ebv, R_V=3.1, LMC2=False, AVGLMC=False):
 	return 10.**(0.4*curve)
 
 
-def hpf(flux,windowsize=0,w_start=0):
+def hpf(flux, windowsize=20, w_start=20):
 	"""
 	What does this one do ? High pass filtering ?
 	"""
 	D = np.size(flux)
-	w = w_start
-	f = flux
-
+	#w_start = w_start
 	# Rita's typical inputs for SDSS:
 	# w = 10 # 10
 	# windowsize = 20 # 20
@@ -742,11 +741,11 @@ def hpf(flux,windowsize=0,w_start=0):
 	# if w == 0 and windowsize == 0:
 	#     w = 40
 	#     windowsize = 0
-	if w == 0 and windowsize == 0:
-		w = int(D/100.0)
+	if w_start == 0 and windowsize == 0:
+		w_start = int(D/100.0)
 		windowsize = 0.0
 
-	h           = np.fft.fft(f)
+	h           = np.fft.fft(flux)
 	h_filtered  = np.zeros(D,dtype=complex)
 	window      = np.zeros(D)
 	unwindow    = np.zeros(D)
@@ -757,12 +756,12 @@ def hpf(flux,windowsize=0,w_start=0):
 
 	if windowsize > 0:
 		for i in range(dw):
-			window[w+i] = (i+1.0)/dw_float
-			window[D-1-(w+dw-i)] = (dw_float-i)/dw_float
+			window[w_start+i] = (i+1.0)/dw_float
+			window[D-1-(w_start+dw-i)] = (dw_float-i)/dw_float
 
-		window[w+dw:D-(w+dw)] = 1
+		window[w_start+dw:D-(w_start+dw)] = 1
 	else:
-		window[w:D-w] = 1
+		window[w_start:D-w_start] = 1
 
 
 	unwindow        = 1 - window
@@ -794,23 +793,31 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 	:param metal: metallicity
 	"""
 	# 1. high pass filters the data and the models
+	t_i = time.time()
+	print('start dust determination', t_i)
 	smoothing_length = SPM.dust_smoothing_length
+	print('smoothing done', time.time()-t_i)
 	hpf_data    = hpf(data_flux)
+	print('hpf done', time.time()-t_i)
 	hpf_models  = np.zeros(np.shape(model_flux))
 	for m in range(len(model_flux)):
 		hpf_models[m] = hpf(model_flux[m])
+	print('propagated to models done', time.time()-t_i)
 
 	zero_dat = np.where( (np.isnan(hpf_data)) & (np.isinf(hpf_data)) )
 	hpf_data[zero_dat] = 0.0
 	for m in range(len(model_flux)):
 		hpf_models[m,zero_dat] = 0.0
+	print('nans=>0', time.time()-t_i)
 	hpf_error    = np.zeros(len(error_flux))
 	hpf_error[:] = np.median(error_flux)/np.median(data_flux) * np.median(hpf_data)
 	hpf_error[zero_dat] = np.max(hpf_error)*999999.9
 	# 2. normalises the hpf_models to the median hpf_data
 	hpf_models,mass_factors = normalise_spec(hpf_data,hpf_models)
+	print('normalization', time.time()-t_i)
 	# 3. fits the hpf models to data : chi2 maps
 	hpf_weights,hpf_chis,hpf_branch = fitter(wave,hpf_data,hpf_error, hpf_models , SPM )
+	print('fitting EBV', time.time()-t_i)
 	# 4. use best fit to determine the attenuation curve : fine_attenuation
 	best_fit_index  = [np.argmin(hpf_chis)]
 	best_fit_hpf    = np.dot(hpf_weights[best_fit_index],hpf_models)[0]
@@ -820,11 +827,14 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 	fine_attenuation[bad_atten] = 1.0
 	hpf_error[bad_atten] = np.max(hpf_error)*9999999999.9 
 	fine_attenuation= fine_attenuation / np.median(fine_attenuation)
+	print('finalize EBV', time.time()-t_i)
 	# 5. propagates the hpf to the age and metallicity estimates
 	av_age_hpf      = np.dot(hpf_weights,age)
 	av_metal_hpf    = np.dot(hpf_weights,metal)
+	print('get age, metal', time.time()-t_i)
 	# 6. smoothes the attenuation curve obtained
 	smooth_attenuation = curve_smoother(wave,fine_attenuation,smoothing_length)
+	print('smoothes distribution', time.time()-t_i)
 
 	# Fit a dust attenuation law to the best fit attenuation.
 	if SPM.dust_law == 'calzetti':
@@ -893,7 +903,7 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 
 		dust_fit = ebv_arr[np.argmin(chi_dust)]
 
-
+	print('fits attenuation', time.time()-t_i)
 	# print "Best E(B-V) = "+str(dust_fit)
 	return dust_fit,smooth_attenuation
 
