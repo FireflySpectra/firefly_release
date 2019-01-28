@@ -32,11 +32,12 @@ import pandas as pd
 import os,sys
 from os.path import join
 import copy
+from scipy.interpolate import interp1d
 #from scipy.stats import sigmaclip
 from estimations_3d import estimation
 #from firefly_dust import *
 #import firefly_dust as f_dust
-from firefly_dust import hpf, unred, determine_attenuation
+from firefly_dust import hpf, unred, determine_attenuation, dust_calzetti_py
 from firefly_instrument import downgrade
 from firefly_fitter import fitter
 from firefly_library import airtovac, convert_chis_to_probs, light_weights_to_mass, calculate_averages_pdf, normalise_spec, match_data_models
@@ -386,16 +387,26 @@ class StellarPopulationModel:
 				# B. matches the model and data to the same resolution
 				#print( "Matching models to data" )
 				#print("data: w,f,b,fe", len(self.specObs.restframe_wavelength), len(self.specObs.flux), len(self.specObs.bad_flags), len(self.specObs.error) )
+				self.raw_model_wave_int = model_wave_int
+				self.raw_model_flux_int = model_flux_int
+				self.raw_age = age
+				self.raw_metal = metal
+				print(len(model_wave_int), len(model_flux_int), len(age), len(metal))
 				wave, data_flux, error_flux, model_flux_raw = match_data_models( self.specObs.restframe_wavelength, self.specObs.flux, self.specObs.bad_flags, self.specObs.error, model_wave_int, model_flux_int, self.wave_limits[0], self.wave_limits[1], saveDowngradedModel = False)
-				#print("model: w,f,fe,fr", len(wave), len(data_flux), len(error_flux), len(model_flux_raw))
-				# C. normalises the models to the median value of the data
+				print("model: w,f,fe,fr", len(wave), len(data_flux), len(error_flux), len(model_flux_raw))
+				self.matched_wave = model_wave_int
+				self.matched_model_flux_raw = model_flux_raw
+				# C. normalises the models to the median value of the model [erg/s/A/Msun]
 				# print "Normalising the models"
 				model_flux, mass_factors = normalise_spec(data_flux, model_flux_raw)
+				self.matched_model_flux = model_flux
+				self.matched_mass_factors = mass_factors
 
 			# 3. Corrects from dust attenuation
 			if self.hpf_mode=='on':
 				# 3.1. Determining attenuation curve through HPF fitting, apply attenuation curve to models and renormalise spectra
 				best_ebv, attenuation_curve = determine_attenuation(wave, data_flux, error_flux, model_flux, self, age, metal)
+				self.attenuation_curve = attenuation_curve
 				model_flux_atten = np.zeros(np.shape(model_flux_raw))
 				for m in range(len(model_flux_raw)):
 					model_flux_atten[m] = attenuation_curve * model_flux_raw[m]
@@ -451,9 +462,18 @@ class StellarPopulationModel:
 	
 				best_fit_index = [np.argmin(chis)]
 				best_fit = np.dot(light_weights[best_fit_index],model_flux)[0]
+				
+				#attenuation = dust_calzetti_py(best_ebv,model_wave_int)
+				#self.attenuation = attenuation
+				itp = interp1d(np.hstack(( 2000., wave, 20000)) , np.hstack((attenuation_curve[0], attenuation_curve, attenuation_curve[-1])) )
+				attenuation = itp(model_wave_int)
+				best_fit_full = np.dot(light_weights[best_fit_index]*mass_factors, model_flux_int)[0]*attenuation
+				best_fit_full_noHPF = np.dot(light_weights[best_fit_index]*mass_factors, model_flux_int)[0]
+				
 				# stores outputs in the object
 				self.best_fit_index = best_fit_index
 				self.best_fit = best_fit
+				self.best_fit_full = best_fit_full
 				self.model_flux = model_flux
 				self.dist_lum = dist_lum
 				self.age = np.array(age)
@@ -464,7 +484,6 @@ class StellarPopulationModel:
 				self.branch = branch
 				self.unnorm_mass = unnorm_mass
 				self.probs = probs
-				self.best_fit = best_fit
 				self.averages = averages
 				self.wave = wave
 	
@@ -562,12 +581,14 @@ class StellarPopulationModel:
 				combined_gas_fraction = np.sum(mass_per_ssp - final_ML_totM)
 	
 				# 8. It writes the output file
-				waveCol = pyfits.Column(name="wavelength",format="D", unit="Angstrom", array= wave)
+				#waveCol = pyfits.Column(name="wavelength",format="D", unit="Angstrom", array= wave)
 				#dataCol = pyfits.Column(name="original_data",format="D", unit="1e-17erg/s/cm2/Angstrom", array= data_flux)
 				#errorCol = pyfits.Column(name="flux_error",format="D", unit="1e-17erg/s/cm2/Angstrom", array= error_flux)
-				best_fitCol = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit)
-				best_fitCol_um = pyfits.Column(name="firefly_model_unmasked",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit)
-				cols = pyfits.ColDefs([ waveCol, best_fitCol, best_fitCol_um]) # dataCol, errorCol, 
+				#best_fitCol = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit)
+				waveCol_um = pyfits.Column(name="wavelength",format="D", unit="Angstrom", array= model_wave_int)
+				best_fitCol_um = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit_full)
+				best_fitCol_um = pyfits.Column(name="firefly_model_noHPF",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit_full_noHPF)
+				cols = pyfits.ColDefs([  waveCol_um, best_fitCol_um]) # dataCol, errorCol, waveCol, best_fitCol,
 				tbhdu = pyfits.BinTableHDU.from_columns(cols)
 				#tbhdu.header['HIERARCH age_universe (Gyr)'] = trylog10(self.cosmo.age(self.specObs.redshift).value*10**9)
 				tbhdu.header['HIERARCH redshift'] = self.specObs.redshift
