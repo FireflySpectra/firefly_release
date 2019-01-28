@@ -8,7 +8,6 @@ run_dir = '/home/comparat/software/linux/FireflySpectra/firefly_dev/doc/run_dr16
 def writeScript(plate, spec_files):
   f=open(run_dir + plate+".sh",'w')
   f.write("#!/bin/bash \n")
-  f.write("#SBATCH --partition=he2srvHighP \n")
   f.write("#SBATCH --time=2000:00:00 \n")
   f.write("#SBATCH --nodes=1 \n")
   f.write("#SBATCH --ntasks=1 \n")
