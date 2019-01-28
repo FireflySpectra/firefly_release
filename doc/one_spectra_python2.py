@@ -10,7 +10,7 @@ import numpy as np
 import GalaxySpectrumFIREFLY as gs
 import StellarPopulationModel as spm
 
-cosmo = co.Planck13
+cosmo = co.Planck15
 models_key = 'm11'
 
 def runSpec(specLiteFile):

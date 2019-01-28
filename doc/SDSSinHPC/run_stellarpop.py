@@ -157,7 +157,7 @@ def runSpec(specLiteFile):
 indir = sys.argv[1] #; print 'Input directory: ',indir
 outdir = sys.argv[2] #; print 'Output directory: ',outdir
 
-cosmo = co.Planck13
+cosmo = co.Planck15
 models_key = 'm11'
 
 fileList = np.array(glob.glob(indir+'spec-*.fits'))
