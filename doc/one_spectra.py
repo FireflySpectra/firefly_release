@@ -13,7 +13,7 @@ import StellarPopulationModel as spm
 cosmo = co.Planck15
 models_key = 'm11'
 
-def runSpec(specLiteFile):
+def runSpec_DR16(specLiteFile):
 	t0=time.time()
 	baseN = os.path.basename(specLiteFile).split('-')
 	plate = baseN[1] 
@@ -25,7 +25,7 @@ def runSpec(specLiteFile):
 	if os.path.isfile(output_file):
 		print('already done', time.time()-t0)
 		return 0.
-	print(output_file)
+	
 	if os.path.isdir(outputFolder)==False:
 		os.mkdir(outputFolder)
 
@@ -33,8 +33,8 @@ def runSpec(specLiteFile):
 	spec.openObservedSDSSSpectrum(survey='sdss4')
 
 	ageMin = 0. ; ageMax = 20.
-	ZMin = 0.001 ; ZMax = 4.
-	if spec.hdulist[2].data['CLASS'][0]=="GALAXY" and spec.hdulist[2].data['Z'][0] >  spec.hdulist[2].data['Z_ERR'][0] and spec.hdulist[2].data['Z_ERR'][0]>0 and (( spec.hdulist[2].data['ZWARNING'][0] ==0 ) | (spec.hdulist[2].data['ZWARNING'][0] ==4)) :
+	ZMin = 0.001 ; ZMax = 10.
+	if spec.hdulist[2].data['CLASS_NOQSO'][0]=="GALAXY" and spec.hdulist[2].data['Z_NOQSO'][0] >  spec.hdulist[2].data['Z_ERR_NOQSO'][0] and spec.hdulist[2].data['Z_ERR_NOQSO'][0]>0 and (( spec.hdulist[2].data['ZWARNING_NOQSO'][0] ==0 ) | (spec.hdulist[2].data['ZWARNING_NOQSO'][0] ==4)) :
 		print( 'Output file:'              )
 		print( output_file                 )
 		print( "--------------------------")
@@ -75,6 +75,7 @@ def runSpec(specLiteFile):
 		except (ValueError):
 			tables.append( model_1.create_dummy_hdu() )
 			did_not_converged +=1
+			print('did not converge')
 
 		#try :
 			#model_1 = spm.StellarPopulationModel(spec, output_file, cosmo, models = models_key, model_libs = ['STELIB'], imfs = ['cha'], age_limits = [ageMin,ageMax], downgrade_models = False, data_wave_medium = 'vacuum', Z_limits = [ZMin,ZMax], use_downgraded_models = False, write_results = False)
@@ -84,9 +85,10 @@ def runSpec(specLiteFile):
 		#except (ValueError):
 			#tables.append( model_1.create_dummy_hdu() )
 			#did_not_converged +=1
+			#print('did not converge')
 
 		
-		if did_not_converged < 1 :
+		if did_not_converged < 2 :
 			complete_hdus = spm.pyfits.HDUList(tables)
 			if os.path.isfile(output_file):
 				os.remove(output_file)
@@ -105,6 +107,6 @@ def runSpec(specLiteFile):
 file_name = sys.argv[1]
 print( file_name)
 # Make sure output is in correct place.
-spec_class, model_class = runSpec(file_name)
+spec_class, model_class = runSpec_DR16(file_name)
 
 #main()
