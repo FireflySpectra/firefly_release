@@ -13,7 +13,7 @@ import numpy as n
 #plates = n.hstack(( pl21, pl22, pl23 ))
 
 #scripts = n.array([pl+'.sh' for pl in plates ])
-scripts = n.array(glob.glob("36*.sh"))
+scripts = n.array(glob.glob("9*.sh"))
 scripts.sort()
 
 for script in scripts:

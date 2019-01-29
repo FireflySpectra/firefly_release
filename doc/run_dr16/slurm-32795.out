@@ -1,0 +1,19 @@
+/home/comparat/software/linux/FireflySpectra/firefly_dev/python/GalaxySpectrumFIREFLY.py:88: RuntimeWarning: divide by zero encountered in power
+  self.error = self.hdulist[1].data['ivar']**(-0.5)
+GALAXY 0.6624577 0.00031254222 0
+Output file:
+/data43s/SDSS/v5_11_0/firefly/3674/spFly-3674-55182-0001.fits
+--------------------------
+getting the models, t= 1548748320.3742537
+Corrects from dust attenuation and fitting, Dt= 11.223514080047607 seconds
+dust done, Dt= 22.87973642349243 seconds
+fitting done, Dt= 37.71854758262634 seconds
+Gets the best model, Dt= 37.718570709228516 seconds
+m1 43.408377170562744
+getting the models, t= 1548748359.9295998
+Corrects from dust attenuation and fitting, Dt= 10.717732906341553 seconds
+dust done, Dt= 18.0191011428833 seconds
+fitting done, Dt= 35.93060541152954 seconds
+Gets the best model, Dt= 35.93063235282898 seconds
+m2 81.7077853679657
+time used = 81.75937008857727 seconds
