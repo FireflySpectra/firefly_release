@@ -34,6 +34,7 @@ def runSpec_DR16(specLiteFile):
 
 	ageMin = 0. ; ageMax = 20.
 	ZMin = 0.001 ; ZMax = 10.
+	print(spec.hdulist[2].data['CLASS_NOQSO'][0], spec.hdulist[2].data['Z_NOQSO'][0], spec.hdulist[2].data['Z_ERR_NOQSO'][0], spec.hdulist[2].data['ZWARNING_NOQSO'][0] )
 	if spec.hdulist[2].data['CLASS_NOQSO'][0]=="GALAXY" and spec.hdulist[2].data['Z_NOQSO'][0] >  spec.hdulist[2].data['Z_ERR_NOQSO'][0] and spec.hdulist[2].data['Z_ERR_NOQSO'][0]>0 and (( spec.hdulist[2].data['ZWARNING_NOQSO'][0] ==0 ) | (spec.hdulist[2].data['ZWARNING_NOQSO'][0] ==4)) :
 		print( 'Output file:'              )
 		print( output_file                 )
@@ -96,17 +97,11 @@ def runSpec_DR16(specLiteFile):
 			complete_hdus.writeto(output_file)
 	
 	print ("time used =", time.time()-t0 ,"seconds")
-	try:
-		return spec, model_1
-	except(TypeError):
-		return 0., 0.
+	#return spec, model_1
 
 
-#def main():
-# Get argument from file
-file_name = sys.argv[1]
-print( file_name)
-# Make sure output is in correct place.
-spec_class, model_class = runSpec_DR16(file_name)
+def main():
+	file_name = sys.argv[1]
+	runSpec_DR16(file_name)
 
-#main()
+main()
