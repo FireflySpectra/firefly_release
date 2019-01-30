@@ -71,11 +71,11 @@ class Photo():
 		self.filter_names = ["SDSS_u", "SDSS_g", "SDSS_r", "SDSS_i", "SDSS_z"]
 		self.nFilters=5
 		
-		uf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/uSDSS.filter"), unpack=True)                  
-		gf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/gSDSS.filter"), unpack=True)
-		rf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/rSDSS.filter"), unpack=True)
-		yf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/iSDSS.filter"), unpack=True)
-		zf=np.loadtxt(os.path.join(os.environ[env_spm], "filter/sdss/zSDSS.filter"), unpack=True)
+		uf=np.loadtxt(os.path.join(os.environ[env_spm], "data/filter/sdss/uSDSS.filter"), unpack=True)                  
+		gf=np.loadtxt(os.path.join(os.environ[env_spm], "data/filter/sdss/gSDSS.filter"), unpack=True)
+		rf=np.loadtxt(os.path.join(os.environ[env_spm], "data/filter/sdss/rSDSS.filter"), unpack=True)
+		yf=np.loadtxt(os.path.join(os.environ[env_spm], "data/filter/sdss/iSDSS.filter"), unpack=True)
+		zf=np.loadtxt(os.path.join(os.environ[env_spm], "data/filter/sdss/zSDSS.filter"), unpack=True)
 		
 		self.lambda_min={'SDSS_u': np.min(uf[0]), 'SDSS_g':  np.min(gf[0]),'SDSS_r':  np.min(rf[0]),'SDSS_i':  np.min(yf[0]), 'SDSS_z':  np.min(zf[0]) }        
 		self.lambda_max={'SDSS_u': np.max(uf[0]), 'SDSS_g':  np.max(gf[0]),'SDSS_r':  np.max(rf[0]),'SDSS_i':  np.max(yf[0]), 'SDSS_z':  np.max(zf[0]) }        

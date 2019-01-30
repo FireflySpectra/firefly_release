@@ -3,15 +3,8 @@
 import numpy as np
 import sys, os
 from os.path import join
-import astropy.cosmology as co
 import time
 import numpy as np
-# Firefly modules
-import GalaxySpectrumFIREFLY as gs
-import StellarPopulationModel as spm
-
-cosmo = co.Planck15
-models_key = 'm11'
 
 def runSpec_DR16(specLiteFile):
 	t0=time.time()
@@ -29,8 +22,17 @@ def runSpec_DR16(specLiteFile):
 	if os.path.isdir(outputFolder)==False:
 		os.mkdir(outputFolder)
 
+	# Firefly modules and parameters
+	import GalaxySpectrumFIREFLY as gs
+	import StellarPopulationModel as spm
+	import astropy.cosmology as co
+
+	cosmo = co.Planck15
+	models_key = 'm11'
+	testing = True
+
 	spec=gs.GalaxySpectrumFIREFLY(specLiteFile, milky_way_reddening=True)
-	spec.openObservedSDSSSpectrum(survey='sdss4')
+	spec.openObservedSDSSSpectrum(survey='sdss4', testing=testing)
 
 	ageMin = 0. ; ageMax = 20.
 	ZMin = 0.001 ; ZMax = 10.
@@ -97,7 +99,7 @@ def runSpec_DR16(specLiteFile):
 			complete_hdus.writeto(output_file)
 	
 	print ("time used =", time.time()-t0 ,"seconds")
-	#return spec, model_1
+	return 1. #spec, model_1
 
 
 def main():
