@@ -60,7 +60,7 @@ class GalaxySpectrumFIREFLY:
 		self.hpf_mode = hpf_mode
 		self.N_angstrom_masked = N_angstrom_masked
 
-	def openObservedSDSSSpectrum(self, survey='sdssMain'):
+	def openObservedSDSSSpectrum(self, survey='sdssMain', testing=False):
 		"""
 		It reads an SDSS spectrum and provides the input for the firefly fitting routine.
 
@@ -103,9 +103,12 @@ class GalaxySpectrumFIREFLY:
 		ratio = np.min(abs(10000.*np.log10(np.outer(self.wavelength, 1./maskLambda))), axis=1)
 		margin = 1.5
 		vet_mask = ratio <= margin
-		
+
 		# masking emission lines
-		lines_mask = ((self.restframe_wavelength > 3728 - self.N_angstrom_masked) & (self.restframe_wavelength < 3728 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 5007 - self.N_angstrom_masked) & (self.restframe_wavelength < 5007 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 4861 - self.N_angstrom_masked) & (self.restframe_wavelength < 4861 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 6564 - self.N_angstrom_masked) & (self.restframe_wavelength < 6564 + self.N_angstrom_masked)) #| (self.restframe_wavelength<3900) | (self.restframe_wavelength>6800)
+		if testing:
+			lines_mask = ((self.restframe_wavelength > 3728 - self.N_angstrom_masked) & (self.restframe_wavelength < 3728 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 5007 - self.N_angstrom_masked) & (self.restframe_wavelength < 5007 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 4861 - self.N_angstrom_masked) & (self.restframe_wavelength < 4861 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 6564 - self.N_angstrom_masked) & (self.restframe_wavelength < 6564 + self.N_angstrom_masked)) | (self.restframe_wavelength<3900) | (self.restframe_wavelength>6800)
+		else:
+			lines_mask = ((self.restframe_wavelength > 3728 - self.N_angstrom_masked) & (self.restframe_wavelength < 3728 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 5007 - self.N_angstrom_masked) & (self.restframe_wavelength < 5007 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 4861 - self.N_angstrom_masked) & (self.restframe_wavelength < 4861 + self.N_angstrom_masked)) | ((self.restframe_wavelength > 6564 - self.N_angstrom_masked) & (self.restframe_wavelength < 6564 + self.N_angstrom_masked)) 
 
 		self.restframe_wavelength = self.restframe_wavelength[(lines_mask==False)&(vet_mask==False)] 
 		self.wavelength = self.wavelength[(lines_mask==False)&(vet_mask==False)] 
