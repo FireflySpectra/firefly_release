@@ -1,8 +1,0 @@
-/home/comparat/software/linux/FireflySpectra/firefly_dev/python/GalaxySpectrumFIREFLY.py:88: RuntimeWarning: divide by zero encountered in power
-  self.error = self.hdulist[1].data['ivar']**(-0.5)
-STAR -2.9063185e-06 5.1552528e-05 0
-time used = 3.3046963214874268 seconds
-/home/comparat/software/linux/FireflySpectra/firefly_dev/python/GalaxySpectrumFIREFLY.py:88: RuntimeWarning: divide by zero encountered in power
-  self.error = self.hdulist[1].data['ivar']**(-0.5)
-STAR 0.0001706211 8.794762e-05 0
-time used = 2.7890124320983887 seconds
