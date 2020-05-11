@@ -665,14 +665,15 @@ class StellarPopulationModel:
 				combined_gas_fraction = np.sum(mass_per_ssp - final_ML_totM)
 	
 				# 8. It writes the output file
-				#waveCol = pyfits.Column(name="wavelength",format="D", unit="Angstrom", array= wave)
-				#dataCol = pyfits.Column(name="original_data",format="D", unit="1e-17erg/s/cm2/Angstrom", array= data_flux)
-				#errorCol = pyfits.Column(name="flux_error",format="D", unit="1e-17erg/s/cm2/Angstrom", array= error_flux)
-				#best_fitCol = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit)
-				waveCol_um = pyfits.Column(name="wavelength",format="D", unit="Angstrom", array= model_wave_int)
-				best_fitCol_um = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit_full)
-				best_fitCol_um_noHPF = pyfits.Column(name="firefly_model_noHPF",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit_full_noHPF)
-				cols = pyfits.ColDefs([  waveCol_um, best_fitCol_um, best_fitCol_um_noHPF]) # dataCol, errorCol, waveCol, best_fitCol,
+				waveCol = pyfits.Column(name="wavelength",format="D", unit="Angstrom", array= wave)
+				dataCol = pyfits.Column(name="original_data",format="D", unit="1e-17erg/s/cm2/Angstrom", array= data_flux)
+				errorCol = pyfits.Column(name="flux_error",format="D", unit="1e-17erg/s/cm2/Angstrom", array= error_flux)
+				best_fitCol = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit)
+				#waveCol_um = pyfits.Column(name="wavelength",format="D", unit="Angstrom", array= model_wave_int)
+				#best_fitCol_um = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit_full)
+				#best_fitCol_um_noHPF = pyfits.Column(name="firefly_model_noHPF",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit_full_noHPF)
+				#cols = pyfits.ColDefs([  waveCol_um, best_fitCol_um, best_fitCol_um_noHPF]) # dataCol, errorCol, waveCol, best_fitCol,
+				cols = pyfits.ColDefs([waveCol, dataCol, errorCol, best_fitCol])
 				tbhdu = pyfits.BinTableHDU.from_columns(cols)
 				#tbhdu.header['HIERARCH age_universe (Gyr)'] = trylog10(self.cosmo.age(self.specObs.redshift).value*10**9)
 				tbhdu.header['HIERARCH redshift'] = self.specObs.redshift
@@ -776,8 +777,9 @@ class StellarPopulationModel:
 		#dataCol = pyfits.Column(name="original_data",format="D", unit="1e-17erg/s/cm2/Angstrom", array= default_array)
 		#errorCol = pyfits.Column(name="flux_error",format="D", unit="1e-17erg/s/cm2/Angstrom", array= default_array)
 		best_fitCol = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= default_array)
-		best_fitCol_um = pyfits.Column(name="firefly_model_unmasked",format="D", unit="1e-17erg/s/cm2/Angstrom", array= default_array)
-		cols = pyfits.ColDefs([ waveCol, best_fitCol, best_fitCol_um]) # dataCol, errorCol, 
+		#best_fitCol_um = pyfits.Column(name="firefly_model_unmasked",format="D", unit="1e-17erg/s/cm2/Angstrom", array= default_array)
+		#cols = pyfits.ColDefs([ waveCol, best_fitCol, best_fitCol_um]) # dataCol, errorCol, 
+		cols = pyfits.ColDefs([ waveCol, best_fitCol]) # dataCol, errorCol, 
 		tbhdu = pyfits.BinTableHDU.from_columns(cols)
 
 		tbhdu.header['IMF'] = dict_imfs[self.imfs[0]]
