@@ -3,6 +3,7 @@
 .. contributor :: Sofia Meneses-Goytia <s.menesesgoytia__at__gmail.com>
 .. contributor :: Violeta Gonzalez-Perez <violegp__at__gmail.com>
 .. contributor :: Harry Hicks <iamhrh__at__hotmail.co.uk>
+.. contributor :: Justus Neumann <jusneuma.astro__at__gmail.com>
 
 General purpose:
 ................
@@ -59,23 +60,29 @@ def trylog10(value):
 class StellarPopulationModel:
 	"""
 	:param specObs: specObs observed spectrum object initiated with the  GalaxySpectrumFIREFLY class.
-	:param models: choose between 'm11', 'bc03' or 'm09'.
+	:param models: choose between 'MaStar', 'm11', 'bc03' or 'm09'.
 
+		* MaStar corresponds to Maraston et al. 2020 <https://ui.adsabs.harvard.edu/abs/2019arXiv191105748M>
 		* m11 corresponds to all the models compared in `Maraston and Stromback 2011  <http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M>`_.
 		* m09 to `Maraston et al. 2009 <http://adsabs.harvard.edu/abs/2009A%26A...493..425M>`_.
 		* bc03 to the `Bruzual and Charlot 2003 models <http://adsabs.harvard.edu/abs/2003MNRAS.344.1000B>`_.
 
-	:param model_libs: only necessary if using m11.
+	:param model_libs: only necessary if using m11 or MaStar.
 	Choose between `MILES <http://adsabs.harvard.edu/abs/2011A%26A...532A..95F>`_, MILES revisednearIRslope, MILES UVextended, `STELIB <http://adsabs.harvard.edu/abs/2003A%26A...402..433L>`_, `ELODIE <http://adsabs.harvard.edu/abs/2007astro.ph..3658P>`_, `MARCS <http://adsabs.harvard.edu/abs/2008A%26A...486..951G>`_.
 
 		* MILES, MILES revisednearIRslope, MILES UVextended, STELIB, ELODIE are empirical libraries.
 		* MARCS is a theoretical library.
+		
+	For MaStar models choose between 'E-MaStar' or 'Th-MaStar'.
+	
+		* E-MaStar stellar parameters are derived from fitting empirical stellar spectra from the MILES stellar library (see Chen et al 2020, in preparation).
+		* Th-MaStar stellar parameters are derived from fitting stellar spectra of theoretical stellar atmospheres from MARCS and ATLAS (see Hill et al 2020, in preparation).
 
 	:param imfs: choose the `initial mass function <https://en.wikipedia.org/wiki/Initial_mass_function>`_:
 
 		* 'ss' for `Salpeter <http://adsabs.harvard.edu/abs/1955ApJ...121..161S>`_or
 		* 'kr' for `Kroupa <http://adsabs.harvard.edu/cgi-bin/bib_query?arXiv:1112.3340>`_ or
-		* 'cha' for `Chabrier <http://adsabs.harvard.edu/abs/2003PASP..115..763C>`_.
+		* 'cha' for `Chabrier <http://adsabs.harvard.edu/abs/2003PASP..115..763C>`_ (not supported for MaStar models).
 
 	:param hpf_mode: 'on' means the code uses HPF to dereden the spectrum, if 'hpf_only' then EBV=0.
 
@@ -100,7 +107,7 @@ class StellarPopulationModel:
 		self.outputFile = outputFile
 		#################### STARTS HERE ####################
 		# sets the models
-		self.models = models # m11/bc03 / m09
+		self.models = models # m11/bc03 / m09/MaStar
 		self.model_libs = model_libs
 		self.suffix = suffix
 		self.deltal_libs = []
@@ -130,6 +137,12 @@ class StellarPopulationModel:
 				self.deltal_libs = [0.4]
 			else:
 				self.deltal_libs = [3.6]
+				
+		elif self.models =='MaStar':
+			r_model = np.loadtxt(os.path.join(os.environ['FF_DIR'],'./MaNGA/MaStar_SSP_v0.1_resolution_lin.txt'))
+			# This provides R=lamba/delta_lambda as numpy ndarray. The params deltal_libs and deltal should probably be renamed. 
+			self.deltal_libs.append(r_model[:,1])
+			
 		# sets the Initial mass function
 		self.imfs = imfs
 		self.hpf_mode = hpf_mode
@@ -197,7 +210,7 @@ class StellarPopulationModel:
 
 
 			# Constructs the metallicity array of models :
-			all_metal_files = glob.glob(model_path+'*')
+			all_metal_files = sorted(glob.glob(model_path+'*'))
 			#print(model_path)
 			#print(all_metal_files)
 			#stop	
@@ -367,6 +380,69 @@ class StellarPopulationModel:
 			# print "Retrieved all models!"
 			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
 			return wavelength, model_flux, age_model, metal_model
+		
+		elif self.models =='MaStar':
+			
+			model_path = join(os.environ['STELLARPOPMODELS_DIR'],'data')
+			ver = 'v0.1'
+			
+			lib = model_used
+			if imf_used == 'kr':
+				slope = 1.3
+			elif imf_used == 'ss':
+				slope = 2.35
+			else:
+				print('Unrecognised IMF. Please choose between kr and ss')
+				sys.exit()
+				
+			#print('IMF slope used: '+str(slope))
+			
+			hdul=pyfits.open(model_path+'/MaStar_SSP_'+ver+'.fits')
+			t=hdul[1].data[:,0,0,0]
+			Z=hdul[1].data[0,:,0,1]
+			s=hdul[1].data[0,0,:,2]
+			wavelength=hdul[2].data
+			if (lib=='Th-MaStar'):
+				fluxgrid=hdul[3].data
+			if (lib=='E-MaStar'):
+				fluxgrid=hdul[4].data
+				
+			sidx = np.where(s==slope)[0][0]
+			
+			model_flux, age_model, metal_model = [],[],[]
+			for ii,age in enumerate(t):
+				if ((age < self.age_limits[0]) or (age > self.age_limits[1])):
+					continue
+				for jj,metal in enumerate(Z):
+					if ((metal<self.Z_limits[0]) or (metal>self.Z_limits[1])):
+						continue
+					if (metal<-1.35 and age<1):
+						continue
+					flux = fluxgrid[ii,jj,sidx,:]
+					
+					# no conversion to vacuum needed, assuming models are in vacuum
+					
+					# downgrades the model
+					if self.downgrade_models:
+						mf = downgrade(wavelength,flux,deltal,self.vdisp_round, wave_instrument, r_instrument)
+					else:
+						mf = copy.copy(flux)
+					
+					# Reddens the models
+					if ebv_mw != 0:
+						attenuations = unred(wavelength,ebv=0.0-ebv_mw)
+						model_flux.append(mf*attenuations)
+					else:
+						model_flux.append(mf)
+					
+					age_model.append(age)
+					metal_model.append(10**metal)
+					
+			#print("Retrieved all models!")
+			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
+			return wavelength, model_flux, age_model, metal_model
+		
+		
 
 	def fit_models_to_data(self):
 		"""
@@ -416,7 +492,7 @@ class StellarPopulationModel:
 				model_flux, mass_factors = normalise_spec(data_flux, model_flux_atten)
 				print('dust done, Dt=', time.time()-t_i,'seconds')
 				# 4. Fits the models to the data
-				self.fit_per_iteration_cap = 1000
+				#self.fit_per_iteration_cap = 1000
 				light_weights, chis, branch = fitter(wave, data_flux, error_flux, model_flux, self)
 				print('fitting done, Dt=', time.time()-t_i,'seconds')
 
