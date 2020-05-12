@@ -1593,6 +1593,10 @@ def downgrade(wave, flux, deltal_in, sigma_galaxy, wave_instrument, r_instrument
 
 	Returns flux of downgraded SED.
 	"""
+	
+	assert len(wave_instrument)==len(r_instrument), \
+		"lengths of wavelength and resolution array of the observation must be equal."
+	
 	sig2fwhm        = 2.0 * np.sqrt(2.0 * np.log(2.0))
 #	fwhm    = deltal_in/wave*c
 #	sigma   = fwhm/sig2fwhm

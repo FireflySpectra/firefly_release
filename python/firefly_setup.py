@@ -2,10 +2,11 @@
 .. moduleauthor:: Johan Comparat <johan.comparat__at__gmail.com>
 .. contributions:: Violeta Gonzalez-Perez <violegp__at__gmail.com>
 ..                 Sofia Meneses-Goytia <s.menesesgoytia__at__gmail.com>
+..                 Justus Neumann <jusneuma.astro__at__gmail.com>
 
 *General purpose*:
 
-The class GalaxySpectrumFIREFLY is dedicated to handling spectra to be fed to FIREFLY for fitting its stellar population
+The class firefly_setup is dedicated to handling spectra to be fed to FIREFLY for fitting its stellar population
 
 *Imports*::
 
@@ -28,7 +29,7 @@ cosmo = cc.Planck15
 import astropy.units as uu
 import cmath
 
-class GalaxySpectrumFIREFLY:
+class firefly_setup:
 	"""
 	Loads the environnement to transform observed spectra into the input for FIREFLY. 
 	
@@ -59,6 +60,47 @@ class GalaxySpectrumFIREFLY:
 		self.milky_way_reddening = milky_way_reddening
 		self.hpf_mode = hpf_mode
 		self.N_angstrom_masked = N_angstrom_masked
+	
+	def openSingleSpectrum(self, wavelength, flux, error, redshift, ra, dec, vdisp, lines_mask, r_instrument):
+        
+		assert len(wavelength)==len(flux)==len(error)==len(lines_mask)==len(r_instrument),\
+			"The arrays wavelength, flux, error, lines_mask and r_instrument must have identical lengths."
+		
+		self.wavelength=wavelength
+		self.flux=flux
+		self.error=error
+		self.redshift=redshift
+		self.ra=ra
+		self.dec=dec
+		self.vdisp=vdisp
+		self.lines_mask=lines_mask
+		self.r_instrument=r_instrument
+		
+		self.DL = cosmo.luminosity_distance(self.redshift).to(uu.cm)
+		self.bad_flags = np.ones(len(self.wavelength))
+		self.bad_flags = self.bad_flags[(self.lines_mask==False)]
+		self.restframe_wavelength = self.wavelength/(1+self.redshift)
+		self.trust_flag = 1
+		self.objid = 0
+		
+		self.restframe_wavelength = self.restframe_wavelength[(self.lines_mask==False)] 
+		self.wavelength = self.wavelength[(self.lines_mask==False)] 
+		self.flux = self.flux[(self.lines_mask==False)]
+		self.error = self.error[(self.lines_mask==False)]
+		self.r_instrument = self.r_instrument[(self.lines_mask==False)]
+		
+		# removes the bad data from the spectrum 
+		self.bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
+		self.flux[self.bad_data]     = 0.0
+		self.error[self.bad_data]     = np.max(self.flux) * 99999999999.9
+		self.bad_flags[self.bad_data] = 0
+		        
+		if self.milky_way_reddening:
+		# gets the amount of MW reddening on the models
+			self.ebv_mw = get_dust_radec(self.ra,self.dec,'ebv')
+		else:
+			self.ebv_mw = 0.0
+		#print(self.ebv_mw)	
 
 	def openObservedSDSSSpectrum(self, survey='sdssMain', testing=False):
 		"""
