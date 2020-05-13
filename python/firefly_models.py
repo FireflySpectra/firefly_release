@@ -547,17 +547,18 @@ class StellarPopulationModel:
 				best_fit_index = [np.argmin(chis)]
 				best_fit = np.dot(light_weights[best_fit_index],model_flux)[0]
 				
+				# The attenuation curve as well as the full wavelength range are currently not used as output.
 				#attenuation = dust_calzetti_py(best_ebv,model_wave_int)
 				#self.attenuation = attenuation
-				itp = interp1d(np.hstack(( 2000., wave, 20000)) , np.hstack((attenuation_curve[0], attenuation_curve, attenuation_curve[-1])) )
-				attenuation = itp(model_wave_int)
-				best_fit_full = np.dot(light_weights[best_fit_index]*mass_factors, model_flux_int)[0]*attenuation
-				best_fit_full_noHPF = np.dot(light_weights[best_fit_index]*mass_factors, model_flux_int)[0]
+				#itp = interp1d(np.hstack(( 2000., wave, 20000)) , np.hstack((attenuation_curve[0], attenuation_curve, attenuation_curve[-1])) )
+				#attenuation = itp(model_wave_int)
+				#best_fit_full = np.dot(light_weights[best_fit_index]*mass_factors, model_flux_int)[0]*attenuation
+				#best_fit_full_noHPF = np.dot(light_weights[best_fit_index]*mass_factors, model_flux_int)[0]
 				
 				# stores outputs in the object
 				self.best_fit_index = best_fit_index
 				self.best_fit = best_fit
-				self.best_fit_full = best_fit_full
+				#self.best_fit_full = best_fit_full
 				self.model_flux = model_flux
 				self.dist_lum = dist_lum
 				self.age = np.array(age)
