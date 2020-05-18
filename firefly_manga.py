@@ -16,6 +16,11 @@ The bin number is optional and should only be given if only a single bin is mean
 """
 
 import os
+
+os.environ["FF_DIR"] = os.getcwd()
+os.environ["PYTHONPATH"] = os.path.join(os.getcwd(), "python")
+os.environ["STELLARPOPMODELS_DIR"] = os.path.join(os.getcwd(), "stellar_population_models")
+
 import sys
 import numpy as np
 import astropy.io.fits as fits
