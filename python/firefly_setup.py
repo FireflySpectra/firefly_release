@@ -2,10 +2,11 @@
 .. moduleauthor:: Johan Comparat <johan.comparat__at__gmail.com>
 .. contributions:: Violeta Gonzalez-Perez <violegp__at__gmail.com>
 ..                 Sofia Meneses-Goytia <s.menesesgoytia__at__gmail.com>
+..                 Justus Neumann <jusneuma.astro__at__gmail.com>
 
 *General purpose*:
 
-The class GalaxySpectrumFIREFLY is dedicated to handling spectra to be fed to FIREFLY for fitting its stellar population
+The class firefly_setup is dedicated to handling spectra to be fed to FIREFLY for fitting its stellar population
 
 *Imports*::
 
@@ -27,8 +28,9 @@ import astropy.cosmology as cc
 cosmo = cc.Planck15
 import astropy.units as uu
 import cmath
+import astropy.constants as const
 
-class GalaxySpectrumFIREFLY:
+class firefly_setup:
 	"""
 	Loads the environnement to transform observed spectra into the input for FIREFLY. 
 	
@@ -59,6 +61,47 @@ class GalaxySpectrumFIREFLY:
 		self.milky_way_reddening = milky_way_reddening
 		self.hpf_mode = hpf_mode
 		self.N_angstrom_masked = N_angstrom_masked
+	
+	def openSingleSpectrum(self, wavelength, flux, error, redshift, ra, dec, vdisp, lines_mask, r_instrument):
+        
+		assert len(wavelength)==len(flux)==len(error)==len(lines_mask)==len(r_instrument),\
+			"The arrays wavelength, flux, error, lines_mask and r_instrument must have identical lengths."
+		
+		self.wavelength=wavelength
+		self.flux=flux
+		self.error=error
+		self.redshift=redshift
+		self.ra=ra
+		self.dec=dec
+		self.vdisp=vdisp
+		self.lines_mask=lines_mask
+		self.r_instrument=r_instrument
+		
+		self.DL = cosmo.luminosity_distance(self.redshift).to(uu.cm)
+		self.bad_flags = np.ones(len(self.wavelength))
+		self.bad_flags = self.bad_flags[(self.lines_mask==False)]
+		self.restframe_wavelength = self.wavelength/(1+self.redshift)
+		self.trust_flag = 1
+		self.objid = 0
+		
+		self.restframe_wavelength = self.restframe_wavelength[(self.lines_mask==False)] 
+		self.wavelength = self.wavelength[(self.lines_mask==False)] 
+		self.flux = self.flux[(self.lines_mask==False)]
+		self.error = self.error[(self.lines_mask==False)]
+		self.r_instrument = self.r_instrument[(self.lines_mask==False)]
+		
+		# removes the bad data from the spectrum 
+		self.bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
+		self.flux[self.bad_data]     = 0.0
+		self.error[self.bad_data]     = np.max(self.flux) * 99999999999.9
+		self.bad_flags[self.bad_data] = 0
+		        
+		if self.milky_way_reddening:
+		# gets the amount of MW reddening on the models
+			self.ebv_mw = get_dust_radec(self.ra,self.dec,'ebv')
+		else:
+			self.ebv_mw = 0.0
+		#print(self.ebv_mw)	
 
 	def openObservedSDSSSpectrum(self, survey='sdssMain', testing=False):
 		"""
@@ -201,74 +244,89 @@ class GalaxySpectrumFIREFLY:
 			self.r_instrument[wi] = 6000.
 
 
-	def openObservedMANGASpectrum(self, data_release, path_to_logcube, path_to_drpall, bin_number, plate_number, ifu_number):
+	def openObservedMANGASpectrum(self, data_release, path_to_logcube, path_to_dapall, bin_number, plate_number, ifu_number):
 		"""Loads an observed MaNGA spectrum in.
 		:param data_release: Must specify which data release of MaNGA you are using, as file structure has changed.
-		:param data_release: Must specify the path to logcube (if using MPL5 or higher). Set to 0 otherwise.		
+		:param path_to_logcube: Must specify the path to logcube (if using MPL5 or higher). Set to 0 otherwise.		
 		"""
-		if data_release == 'MPL5':
-
-			# Read in MAPS file as this contains part of the information.
-			maps_header = pyfits.open(self.path_to_spectrum)
-			bin_identification = maps_header['BINID'].data
+		
+		assert data_release in ['MPL5','MPL6','MPL7','MPL8','MPL9'], "Currently this function only supports data releases > MPL-5."
+		
+		# Read in MAPS file as this contains part of the information.
+		maps_header = pyfits.open(self.path_to_spectrum)
+		bin_identification = maps_header['BINID'].data
+		if data_release=='MPL5':
 			where = np.where(bin_number == bin_identification)
-			x_position, y_position = where[0][0], where[1][0]
-
-			# Get S/N, right ascension and declination.
-			signal, ra, dec = maps_header['BIN_SNR'].data[x_position,y_position], maps_header[0].header['OBJRA'],maps_header[0].header['OBJDEC']
-
-			# Correct sigma for instrumental resolution
-			velocity_dispersion_wrong = maps_header['STELLAR_SIGMA'].data
-			velocity_dispersion_correction = maps_header['STELLAR_SIGMACORR'].data
-			if velocity_dispersion_wrong[x_position,y_position] > velocity_dispersion_correction[x_position,y_position]:
-				correction = np.sqrt((velocity_dispersion_wrong[x_position,y_position])**2-(velocity_dispersion_correction[x_position,y_position])**2)
-				vdisp = correction
-			else:
-				correction = cmath.sqrt((velocity_dispersion_wrong[x_position,y_position])**2-(velocity_dispersion_correction[x_position,y_position])**2)
-				vdisp = velocity_dispersion_wrong[x_position,y_position]
-
-			# Open LOGCUBE to get the flux, wavelength, and error
-			header = pyfits.open(path_to_logcube)
-			wavelength, flux, emline, emline_base, bit_mask, inverse_variance = header['WAVE'].data, header['FLUX'].data, header['EMLINE'].data, header['EMLINE_BASE'].data,header['MASK'].data, header['IVAR'].data
-			self.wavelength = wavelength
-
-			correct_flux = flux[:,x_position,y_position]
-			correct_flux_emline = emline[:, x_position, y_position]
-			output_flux = correct_flux - correct_flux_emline
-			correct_inverse_variance = inverse_variance[:, x_position, y_position]
+		else:
+			where = np.where(bin_number == bin_identification[0,:,:]) #use 1st channel of bin_identification
+		x_position, y_position = where[0][0], where[1][0]
+		
+		# Get S/N, right ascension and declination.
+		signal, ra, dec = maps_header['BIN_SNR'].data[x_position,y_position], maps_header[0].header['OBJRA'],maps_header[0].header['OBJDEC']
+		velocity_dispersion = maps_header['STELLAR_SIGMA'].data 		# DO NOT USE VELOCITY DISPERSION CORRECTION!
+		vdisp = velocity_dispersion[x_position,y_position]
+		
+		# Open LOGCUBE to get the flux, wavelength, and error
+		header = pyfits.open(path_to_logcube)
+		wavelength, flux, emline, bit_mask, inverse_variance = header['WAVE'].data, header['FLUX'].data, header['EMLINE'].data, header['MASK'].data, header['IVAR'].data
+		self.wavelength = wavelength
+		correct_flux = flux[:,x_position,y_position]
+		correct_flux_emline = emline[:, x_position, y_position]
+		output_flux = correct_flux - correct_flux_emline
+		correct_inverse_variance = inverse_variance[:, x_position, y_position]
+		
+		self.error = np.sqrt(1.0/(correct_inverse_variance))
+		self.bad_flags = np.ones(len(output_flux))
+		self.flux = output_flux
+		self.vdisp = vdisp
+		
+		mask = bit_mask[:,x_position,y_position]
+		self.wavelength = self.wavelength[(mask==False)] 
+		self.flux = self.flux[(mask==False)] 
+		self.error = self.error[(mask==False)]
+		self.bad_flags = self.bad_flags[(mask==False)]
+		
+		dap_all = pyfits.open(path_to_dapall)
+		get = np.where(dap_all[1].data['PLATEIFU']==str(plate_number)+'-'+str(ifu_number))
+		c = const.c.value/1000
+		if data_release=='MPL-5':
+			redshift = dap_all[1].data['NSA_REDSHIFT'][get][0]
+			sys_vel = redshift*c
+			bin_vel = maps_header['STELLAR_VEL'].data[x_position,y_position]	
+		else:
+			# Use redshift as measured from the stellar kinematics by the DAP.
+			redshift = dap_all[1].data['STELLAR_Z'][get][0]
+			# If redshift measurement failed, use redshift estimate from NSA or ancillary programs.
+			if redshift<0:
+				redshift = dap_all[1].data['Z'][get][0]
+				
+			sys_vel = maps_header[0].header['SCINPVEL']
+			bin_vel = maps_header['STELLAR_VEL'].data[x_position,y_position]	
+			
+			if np.abs(redshift*c-sys_vel)>1:
+				print('The are problems with the redshift estimate.')
+				print('c*STELLAR_Z = '+str(redshift*c)+', sys_vel = '+str(sys_vel))
+		
+		if redshift<0:
+			print('There are problems with the redshift.')
+			print('z = {}'.format(redshift))
+		
+		redshift_corr = (sys_vel+bin_vel)/c
+		self.redshift = redshift
+		self.restframe_wavelength = self.wavelength / (1.0+redshift_corr)
 					
-			self.error = np.sqrt(1.0/(correct_inverse_variance))
-			self.bad_flags = np.ones(len(output_flux))
-			self.flux = output_flux
-			self.vdisp = vdisp
+		# Get Trust flag, object_id, xpos, ypos and instrumental resolution.
+		self.trust_flag, self.objid, self.r_instrument = True, 0, np.loadtxt(os.path.join(os.environ['FF_DIR'],'./MaNGA/MaNGA_spectral_resolution.txt'))
+		self.r_instrument = self.r_instrument[0:self.r_instrument.shape[0]//2]
+		self.r_instrument = self.r_instrument[(mask==False)]
+		self.xpos, self.ypos = ra, dec
+		
+		# gets the amount of MW reddening on the models
+		if self.milky_way_reddening :
+			self.ebv_mw = get_dust_radec(ra, dec, 'ebv')
+		else:
+			self.ebv_mw = 0.0
 
-			# Open drp all file to get the correct redshift of the galaxy.
-			dap_all = pyfits.open(path_to_drpall)
-			main_header, manga_plate, manga_ifu, manga_redshift = dap_all[1].data, [], [], []
-			for q in range(len(main_header)):
-				galaxy = main_header[q]
-				plate, ifu, z = galaxy['plate'], galaxy['ifudsgn'],galaxy['nsa_z']	
-				manga_plate.append(plate)
-				manga_ifu.append(ifu)
-				manga_redshift.append(z)
-
-			manga_plate, manga_ifu, manga_redshift = np.array(manga_plate,dtype=int), np.array(manga_ifu,dtype=int), np.array(manga_redshift)
-			where = np.where((manga_plate == int(plate_number)))
-			ifu_sorted = manga_ifu[where]
-			redshift_sorted = manga_redshift[where]
-			where_1 = np.where(int(ifu_number) == ifu_sorted)
-			redshift = redshift_sorted[where_1][0]
-			self.restframe_wavelength = wavelength / (1.0+redshift)
-			self.redshift = redshift
-
-			# Get Trust flag, object_id, xpos, ypos and instrumental resolution.
-			self.trust_flag, self.objid, self.r_instrument = True, 0, np.loadtxt('../bin_MaNGA/MaNGA_spectral_resolution.txt')
-			self.xpos, self.ypos = ra, dec 
-			if self.milky_way_reddening :
-				# gets the amount of MW reddening on the models
-				self.ebv_mw = get_dust_radec(ra, dec, 'ebv')
-			else:
-				self.ebv_mw = 0.0
 
 	def openEllipticalsSMG(self):
 		hdulist = pyfits.open(self.path_to_spectrum)
