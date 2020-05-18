@@ -367,9 +367,9 @@ def match_data_models( data_wave_int, data_flux_int, data_flags, error_flux_int,
 		# OPTION : saves the downgraded models.
 		if saveDowngradedModel:
 			#print "saving downgraded models to ",downgradedModelFile
-			f.open(downgradedModelFile,'w')
-			cPickle.dump([matched_wave, matched_data, matched_error],f)
-			f.close()
+			with open(downgradedModelFile,'w') as f:
+				cPickle.dump([matched_wave, matched_data, matched_error],f)
+
 
 	else:
 		#print "More data points than model points! Downgrading data to model sampling ..."

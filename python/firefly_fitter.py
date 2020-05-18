@@ -170,13 +170,13 @@ def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 				if check_better:
 					# If they do, add them to the fit list!
 					count_new += 1
-					if count_new > fit_cap:
-						break
+					#if count_new > fit_cap:
+					#	break
 					fit_list.append(new_list[n])
 
-			if count_new > fit_cap:
+			#if count_new > fit_cap:
 				# #print "Capped solutions at "+str(fit_cap)
-				break
+				#break
 		if count_new == 0:
 			# If they don't, we have finished the iteration process and may return.
 			# #print "Converged!"
@@ -185,7 +185,7 @@ def fitter(wavelength_in,data_in,error_in,models_in,SPM):
 			return fit_list
 		else:
 			if iterate_count == 10:
-				# #print "Fit has not converged within user-defined number of iterations."
+				print("Fit has not converged within user-defined number of iterations.")
 				# #print "Make sure this is a reasonable number."
 				# #print "Returning all fits up to this stage."
 				return fit_list
