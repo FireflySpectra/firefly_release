@@ -13,9 +13,9 @@ from astropy.io import fits
 import numpy as np
 import sys, os
 
+sys.path.append(os.path.join(os.getcwd(), "python"))
 os.environ["FF_DIR"] = os.getcwd()
-os.environ["PYTHONPATH"] = os.path.join(os.getcwd(), "python")
-os.environ["STELLARPOPMODELS_DIR"] = os.path.join(os.getcwd(), "stellar_population_models")
+os.environ["STELLARPOPMODELS_DIR"] = os.path.join(os.environ["FF_DIR"], "stellar_population_models")
 
 import time
 import firefly_setup as setup
@@ -27,7 +27,7 @@ t0=time.time()
 
 #input file with path to read in wavelength, flux and flux error arrays
 #the example is for an ascii file with extension 'ascii'
-input_file=sys.argv[1]
+input_file='example_data/spec-0266-51602-0001.fits'
 hdul = fits.open(input_file)
 
 #redshift

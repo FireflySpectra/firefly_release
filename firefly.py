@@ -13,9 +13,9 @@ import numpy as np
 import sys, os
 from os.path import join
 
+sys.path.append(os.path.join(os.getcwd(), "python"))
 os.environ["FF_DIR"] = os.getcwd()
-os.environ["PYTHONPATH"] = os.path.join(os.getcwd(), "python")
-os.environ["STELLARPOPMODELS_DIR"] = os.path.join(os.getcwd(), "stellar_population_models")
+os.environ["STELLARPOPMODELS_DIR"] = os.path.join(os.environ["FF_DIR"], "stellar_population_models")
 
 import time
 import firefly_setup as setup
