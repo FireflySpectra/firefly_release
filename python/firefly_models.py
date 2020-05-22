@@ -588,7 +588,7 @@ class StellarPopulationModel:
 		
 				# Gets the mass loss factors.
 				if dict_imfs[self.imfs[0]] == 'Salpeter':
-					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data','massloss_salpeter.txt'), unpack=True, skiprows=2)
+					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['FF_DIR'],'data','massloss_salpeter.txt'), unpack=True, skiprows=2)
 					# First build the grids of the quantities. Make sure they are in linear units.                  
 					estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
 					estimate_ML_ns, estimate_ML_bh, estimate_ML_turnoff = estimation(10**ML_metallicity, ML_age, ML_ns), estimation(10**ML_metallicity, ML_age, ML_bh), estimation(10**ML_metallicity, ML_age, ML_turnoff)
@@ -611,7 +611,7 @@ class StellarPopulationModel:
 					final_ML_totM, final_ML_alive, final_ML_wd, final_ML_ns, final_ML_bh, final_ML_turnoff, final_gas_fraction= np.array(final_ML_totM), np.array(final_ML_alive), np.array(final_ML_wd), np.array(final_ML_ns), np.array(final_ML_bh), np.array(final_ML_turnoff), np.array(final_gas_fraction)
 
 				if (dict_imfs[self.imfs[0]] == 'Chabrier'):
-					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data', 'massloss_chabrier.txt'), unpack=True, skiprows=2)
+					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['FF_DIR'],'data', 'massloss_chabrier.txt'), unpack=True, skiprows=2)
 					# First build the grids of the quantities. Make sure they are in linear units.			
 					estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
 					estimate_ML_ns, estimate_ML_bh, estimate_ML_turnoff = estimation(10**ML_metallicity, ML_age, ML_ns), estimation(10**ML_metallicity, ML_age, ML_bh), estimation(10**ML_metallicity, ML_age, ML_turnoff)
@@ -634,7 +634,7 @@ class StellarPopulationModel:
 					final_ML_totM, final_ML_alive, final_ML_wd, final_ML_ns, final_ML_bh, final_ML_turnoff, final_gas_fraction= np.array(final_ML_totM), np.array(final_ML_alive), np.array(final_ML_wd), np.array(final_ML_ns), np.array(final_ML_bh), np.array(final_ML_turnoff), np.array(final_gas_fraction)
 					
 				if (dict_imfs[self.imfs[0]] == 'Kroupa'):
-					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data','massloss_kroupa.txt'), unpack=True, skiprows=2)
+					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['FF_DIR'],'data','massloss_kroupa.txt'), unpack=True, skiprows=2)
 					# First build the grids of the quantities. Make sure they are in linear units.			
 					estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
 					estimate_ML_ns, estimate_ML_bh, estimate_ML_turnoff = estimation(10**ML_metallicity, ML_age, ML_ns), estimation(10**ML_metallicity, ML_age, ML_bh), estimation(10**ML_metallicity, ML_age, ML_turnoff)
