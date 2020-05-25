@@ -397,7 +397,7 @@ class StellarPopulationModel:
 				
 			#print('IMF slope used: '+str(slope))
 			
-			hdul=pyfits.open(model_path+'/MaStar_SSP_'+ver+'.fits')
+			hdul=pyfits.open(model_path+'/MaStar_SSP_'+ver+'.fits.gz')
 			t=hdul[1].data[:,0,0,0]
 			Z=hdul[1].data[0,:,0,1]
 			s=hdul[1].data[0,0,:,2]
