@@ -36,7 +36,7 @@ from os.path import join
 import copy
 from scipy.interpolate import interp1d
 #from scipy.stats import sigmaclip
-from estimations_3d import estimation
+from firefly_estimations_3d import estimation
 #from firefly_dust import *
 #import firefly_dust as f_dust
 from firefly_dust import hpf, unred, determine_attenuation, dust_calzetti_py
@@ -139,7 +139,7 @@ class StellarPopulationModel:
 				self.deltal_libs = [3.6]
 				
 		elif self.models =='MaStar':
-			r_model = np.loadtxt(os.path.join(os.environ['FF_DIR'],'./MaNGA/MaStar_SSP_v0.1_resolution_lin.txt'))
+			r_model = np.loadtxt(os.path.join(os.environ['FF_DIR'],'./data/MaStar_SSP_v0.1_resolution_lin.txt'))
 			# This provides R=lamba/delta_lambda as numpy ndarray. The params deltal_libs and deltal should probably be renamed. 
 			self.deltal_libs.append(r_model[:,1])
 			
@@ -199,14 +199,14 @@ class StellarPopulationModel:
 			#stop
 			if self.use_downgraded_models :
 				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_MILES_downgraded','ssp_M11_' + model_used+ '.' + imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES_downgraded','ssp_M11_' + model_used+ '.' + imf_used)
 				else:
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_'+ model_used + '_downgraded', 'ssp_M11_' +model_used +'.' + imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+ model_used + '_downgraded', 'ssp_M11_' +model_used +'.' + imf_used)
 			else:
 				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_MILES', 'ssp_M11_'+model_used+'.'+imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES', 'ssp_M11_'+model_used+'.'+imf_used)
 				else:
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_'+model_used ,'ssp_M11_' +model_used +'.' + imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+model_used ,'ssp_M11_' +model_used +'.' + imf_used)
 
 
 			# Constructs the metallicity array of models :
@@ -311,9 +311,9 @@ class StellarPopulationModel:
 			first_file  = True
 			model_files = []
 			if self.use_downgraded_models:
-				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'data','UVmodels_Marastonetal08b_downgraded')
+				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'UVmodels_Marastonetal08b_downgraded')
 			else:
-				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'data','UVmodels_Marastonetal08b')
+				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'UVmodels_Marastonetal08b')
 			# Gathers the list of models with metallicities and ages of interest:
 			all_metal_files = glob.glob(model_path+'*')
 			metal_files 	= []
@@ -383,7 +383,7 @@ class StellarPopulationModel:
 		
 		elif self.models =='MaStar':
 			
-			model_path = join(os.environ['STELLARPOPMODELS_DIR'],'data')
+			model_path = os.environ['STELLARPOPMODELS_DIR']
 			ver = 'v0.1'
 			
 			lib = model_used
