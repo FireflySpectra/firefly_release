@@ -44,7 +44,7 @@ import numpy as np
 import astropy
 from astropy.constants import c as speedOfLight
 c = speedOfLight.to('km/s').value
-from constants import *
+from firefly_constants import *
 
 def where_not(indx, size):
 	"""
