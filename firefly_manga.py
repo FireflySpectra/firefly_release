@@ -44,7 +44,7 @@ suffix = ''
 # define plate number, IFU number, bin number
 plate = 8080
 ifu = 12701
-bin_number = 1 #'all' if entire IFU, otherwise bin number
+bin_number = 'all' #'all' if entire IFU, otherwise bin number
 
 # masking emission lines
 # defines size of mask in pixels
