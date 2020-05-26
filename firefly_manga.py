@@ -44,7 +44,7 @@ suffix = ''
 # define plate number, IFU number, bin number
 plate = 8080
 ifu = 12701
-bin_number = 1
+bin_number = 1 #'all' if entire IFU, otherwise bin number
 
 # masking emission lines
 # defines size of mask in pixels
@@ -153,6 +153,9 @@ maps_header = fits.open(maps)
 unique_bin_number = list(np.unique(maps_header['BINID'].data)[1:])
 print('Number of bins = {}'.format(len(unique_bin_number)))
 
-f(bin_number)
+if bin_number=='all':
+  N = f_mp(unique_bin_number)
+else:
+  f(bin_number)
 
 print('Time to complete: ', (time.time())-t0)
