@@ -421,15 +421,15 @@ def get_SFD_dust(long,lat,dustmap='ebv',interpolate=True):
         raise ValueError('dustmap is not a string')
     dml=dustmap.lower()
     if dml == 'ebv' or dml == 'eb-v' or dml == 'e(b-v)' :
-        dustmapfn=os.environ['STELLARPOPMODELS_DIR']+'/data/SFD_dust_4096_%s.fits'
+        dustmapfn=os.environ['FF_DIR']+'/data/SFD_dust_4096_%s.fits'
     elif dml == 'i100':
-        dustmapfn=os.environ['STELLARPOPMODELS_DIR']+'/data/SFD_i100_4096_%s.fits'
+        dustmapfn=os.environ['FF_DIR']+'/data/SFD_i100_4096_%s.fits'
     elif dml == 'x':
-        dustmapfn=os.environ['STELLARPOPMODELS_DIR']+'/data/SFD_xmap_%s.fits'
+        dustmapfn=os.environ['FF_DIR']+'/data/SFD_xmap_%s.fits'
     elif dml == 't':
-        dustmapfn=os.environ['STELLARPOPMODELS_DIR']+'/data/SFD_temp_%s.fits'
+        dustmapfn=os.environ['FF_DIR']+'/data/SFD_temp_%s.fits'
     elif dml == 'mask':
-        dustmapfn=os.environ['STELLARPOPMODELS_DIR']+'/data/SFD_mask_4096_%s.fits'
+        dustmapfn=os.environ['FF_DIR']+'/data/SFD_mask_4096_%s.fits'
     else:
         dustmapfn=dustmap
     

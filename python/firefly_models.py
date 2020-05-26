@@ -36,7 +36,7 @@ from os.path import join
 import copy
 from scipy.interpolate import interp1d
 #from scipy.stats import sigmaclip
-from estimations_3d import estimation
+from firefly_estimations_3d import estimation
 #from firefly_dust import *
 #import firefly_dust as f_dust
 from firefly_dust import hpf, unred, determine_attenuation, dust_calzetti_py
@@ -139,7 +139,7 @@ class StellarPopulationModel:
 				self.deltal_libs = [3.6]
 				
 		elif self.models =='MaStar':
-			r_model = np.loadtxt(os.path.join(os.environ['FF_DIR'],'./MaNGA/MaStar_SSP_v0.1_resolution_lin.txt'))
+			r_model = np.loadtxt(os.path.join(os.environ['FF_DIR'],'./data/MaStar_SSP_v0.1_resolution_lin.txt'))
 			# This provides R=lamba/delta_lambda as numpy ndarray. The params deltal_libs and deltal should probably be renamed. 
 			self.deltal_libs.append(r_model[:,1])
 			
@@ -199,14 +199,14 @@ class StellarPopulationModel:
 			#stop
 			if self.use_downgraded_models :
 				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_MILES_downgraded','ssp_M11_' + model_used+ '.' + imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES_downgraded','ssp_M11_' + model_used+ '.' + imf_used)
 				else:
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_'+ model_used + '_downgraded', 'ssp_M11_' +model_used +'.' + imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+ model_used + '_downgraded', 'ssp_M11_' +model_used +'.' + imf_used)
 			else:
 				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_MILES', 'ssp_M11_'+model_used+'.'+imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES', 'ssp_M11_'+model_used+'.'+imf_used)
 				else:
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'data','SSP_M11_'+model_used ,'ssp_M11_' +model_used +'.' + imf_used)
+					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+model_used ,'ssp_M11_' +model_used +'.' + imf_used)
 
 
 			# Constructs the metallicity array of models :
@@ -311,9 +311,9 @@ class StellarPopulationModel:
 			first_file  = True
 			model_files = []
 			if self.use_downgraded_models:
-				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'data','UVmodels_Marastonetal08b_downgraded')
+				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'UVmodels_Marastonetal08b_downgraded')
 			else:
-				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'data','UVmodels_Marastonetal08b')
+				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'UVmodels_Marastonetal08b')
 			# Gathers the list of models with metallicities and ages of interest:
 			all_metal_files = glob.glob(model_path+'*')
 			metal_files 	= []
@@ -383,7 +383,7 @@ class StellarPopulationModel:
 		
 		elif self.models =='MaStar':
 			
-			model_path = join(os.environ['STELLARPOPMODELS_DIR'],'data')
+			model_path = os.environ['STELLARPOPMODELS_DIR']
 			ver = 'v0.1'
 			
 			lib = model_used
@@ -397,7 +397,8 @@ class StellarPopulationModel:
 				
 			#print('IMF slope used: '+str(slope))
 			
-			hdul=pyfits.open(model_path+'/MaStar_SSP_'+ver+'.fits')
+			hdul=pyfits.open(model_path+'/MaStar_SSP_'+ver+'.fits.gz')
+
 			t=hdul[1].data[:,0,0,0]
 			Z=hdul[1].data[0,:,0,1]
 			s=hdul[1].data[0,0,:,2]
@@ -588,7 +589,7 @@ class StellarPopulationModel:
 		
 				# Gets the mass loss factors.
 				if dict_imfs[self.imfs[0]] == 'Salpeter':
-					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data','massloss_salpeter.txt'), unpack=True, skiprows=2)
+					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['FF_DIR'],'data','massloss_salpeter.txt'), unpack=True, skiprows=2)
 					# First build the grids of the quantities. Make sure they are in linear units.                  
 					estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
 					estimate_ML_ns, estimate_ML_bh, estimate_ML_turnoff = estimation(10**ML_metallicity, ML_age, ML_ns), estimation(10**ML_metallicity, ML_age, ML_bh), estimation(10**ML_metallicity, ML_age, ML_turnoff)
@@ -611,7 +612,7 @@ class StellarPopulationModel:
 					final_ML_totM, final_ML_alive, final_ML_wd, final_ML_ns, final_ML_bh, final_ML_turnoff, final_gas_fraction= np.array(final_ML_totM), np.array(final_ML_alive), np.array(final_ML_wd), np.array(final_ML_ns), np.array(final_ML_bh), np.array(final_ML_turnoff), np.array(final_gas_fraction)
 
 				if (dict_imfs[self.imfs[0]] == 'Chabrier'):
-					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data', 'massloss_chabrier.txt'), unpack=True, skiprows=2)
+					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['FF_DIR'],'data', 'massloss_chabrier.txt'), unpack=True, skiprows=2)
 					# First build the grids of the quantities. Make sure they are in linear units.			
 					estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
 					estimate_ML_ns, estimate_ML_bh, estimate_ML_turnoff = estimation(10**ML_metallicity, ML_age, ML_ns), estimation(10**ML_metallicity, ML_age, ML_bh), estimation(10**ML_metallicity, ML_age, ML_turnoff)
@@ -634,7 +635,7 @@ class StellarPopulationModel:
 					final_ML_totM, final_ML_alive, final_ML_wd, final_ML_ns, final_ML_bh, final_ML_turnoff, final_gas_fraction= np.array(final_ML_totM), np.array(final_ML_alive), np.array(final_ML_wd), np.array(final_ML_ns), np.array(final_ML_bh), np.array(final_ML_turnoff), np.array(final_gas_fraction)
 					
 				if (dict_imfs[self.imfs[0]] == 'Kroupa'):
-					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['STELLARPOPMODELS_DIR'],'data','massloss_kroupa.txt'), unpack=True, skiprows=2)
+					ML_metallicity, ML_age, ML_totM, ML_alive, ML_wd, ML_ns, ML_bh, ML_turnoff = np.loadtxt(join(os.environ['FF_DIR'],'data','massloss_kroupa.txt'), unpack=True, skiprows=2)
 					# First build the grids of the quantities. Make sure they are in linear units.			
 					estimate_ML_totM, estimate_ML_alive, estimate_ML_wd = estimation(10**ML_metallicity, ML_age, ML_totM), estimation(10**ML_metallicity, ML_age, ML_alive), estimation(10**ML_metallicity, ML_age, ML_wd)
 					estimate_ML_ns, estimate_ML_bh, estimate_ML_turnoff = estimation(10**ML_metallicity, ML_age, ML_ns), estimation(10**ML_metallicity, ML_age, ML_bh), estimation(10**ML_metallicity, ML_age, ML_turnoff)
