@@ -54,11 +54,72 @@ class firefly_setup:
 		self.milky_way_reddening = milky_way_reddening
 		self.hpf_mode = hpf_mode
 		self.N_angstrom_masked = N_angstrom_masked
+
+	def mask_emissionlines(self, element_emission_lines):
+
+		"""
+		Firefly needs to mask emission lines of elements as this can affect the fitting.
+		"""
+		#Dictionary of corrosponding elements to their emission lines
+		emission_dict = {'He-II' : (3202.15, 4685.74),
+						 'Ne-V'  : (3345.81, 3425.81),
+						 'O-II'  : (3726.03, 3728.73),
+						 'Ne-III': (3868.69, 3967.40),
+						 'H-ζ'   : 3889.05,
+						 'H-ε'   : 3970.07,
+						 'H-δ'   : 4101.73,
+						 'H-γ'   : 4340.46,
+						 'O-III' : (4363.15, 4958.83, 5006.77),
+						 'Ar-IV' : (4711.30, 4740.10),
+						 'H-β'   : 4861.32,
+						 'N-I'   : (5197.90, 5200.39),
+						 'He-I'  : 5875.60,
+						 'O-I'   : (6300.20, 6363.67),
+						 'N-II'  : (6547.96, 6583.34),
+						 'H-α'   : 6562.80,
+						 'S-II'  : (6716.31, 6730.68),
+						 'Ar-III': 7135.67}
+
+		#Create an array full of booleans equal to False, same size as the restframe_wavelength
+		self.lines_mask = np.zeros_like(self.restframe_wavelength,dtype=bool)
+
+		#Loop through the input of the emission lines list
+		for i in range(len(element_emission_lines)):
+
+			#Check if the value is in the dictionary
+			if element_emission_lines[i] in emission_dict:
+
+				ele_line = element_emission_lines[i]
+				line = emission_dict[ele_line]
+
+				#Check if it contains a tuple (some elements have more then one emission line)
+				if type(line) == tuple:
+
+					#Find the number of emission lines for this value
+					n_lines = len(line)
+
+					#Loop through and mask them
+					for n in range(n_lines):
+
+						n_line = line[n]
+
+						#Creates the boolean array
+						temp_lines_mask = ((self.restframe_wavelength > n_line - self.N_angstrom_masked) & (self.restframe_wavelength < n_line + self.N_angstrom_masked))
+						#Adds the boolean array to the exisiting one to save it
+						self.lines_mask = (temp_lines_mask | self.lines_mask)
+						
+				else:
+					temp_lines_mask = ((self.restframe_wavelength > line - self.N_angstrom_masked) & (self.restframe_wavelength < line + self.N_angstrom_masked))
+					self.lines_mask = (temp_lines_mask | self.lines_mask)
+
+			else:
+				print(element_emission_lines[i])
+				raise KeyError
 	
-	def openSingleSpectrum(self, wavelength, flux, error, redshift, ra, dec, vdisp, lines_mask, r_instrument):
+	def openSingleSpectrum(self, wavelength, flux, error, redshift, ra, dec, vdisp, emlines, r_instrument):
         
-		assert len(wavelength)==len(flux)==len(error)==len(lines_mask)==len(r_instrument),\
-			"The arrays wavelength, flux, error, lines_mask and r_instrument must have identical lengths."
+		assert len(wavelength)==len(flux)==len(error)==len(r_instrument),\
+			"The arrays wavelength, flux, error, and r_instrument must have identical lengths."
 		
 		self.wavelength=wavelength
 		self.flux=flux
@@ -67,16 +128,16 @@ class firefly_setup:
 		self.ra=ra
 		self.dec=dec
 		self.vdisp=vdisp
-		self.lines_mask=lines_mask
 		self.r_instrument=r_instrument
 		
 		self.DL = cosmo.luminosity_distance(self.redshift).to(uu.cm)
 		self.bad_flags = np.ones(len(self.wavelength))
-		self.bad_flags = self.bad_flags[(self.lines_mask==False)]
 		self.restframe_wavelength = self.wavelength/(1+self.redshift)
 		self.trust_flag = 1
 		self.objid = 0
 		
+		self.mask_emissionlines(emlines)
+		self.bad_flags = self.bad_flags[(self.lines_mask==False)]
 		self.restframe_wavelength = self.restframe_wavelength[(self.lines_mask==False)] 
 		self.wavelength = self.wavelength[(self.lines_mask==False)] 
 		self.flux = self.flux[(self.lines_mask==False)]
@@ -97,7 +158,7 @@ class firefly_setup:
 		#print(self.ebv_mw)	
 
 
-	def openMANGASpectrum(self, path_to_logcube, path_to_dapall, bin_number, plate_number, ifu_number):
+	def openMANGASpectrum(self, path_to_logcube, path_to_dapall, bin_number, plate_number, ifu_number, emlines):
 		"""Loads an observed MaNGA spectrum in.
 		:param data_release: Must specify which data release of MaNGA you are using, as file structure has changed.
 		:param path_to_logcube: Must specify the path to logcube (if using MPL5 or higher). Set to 0 otherwise.		
@@ -127,13 +188,6 @@ class firefly_setup:
 		self.bad_flags = np.ones(len(output_flux))
 		self.flux = output_flux
 		self.vdisp = vdisp
-		#self.lines_mask=lines_mask
-
-		mask = bit_mask[:,x_position,y_position]# | self.lines_mask
-		self.wavelength = self.wavelength[(mask==False)] 
-		self.flux = self.flux[(mask==False)] 
-		self.error = self.error[(mask==False)]
-		self.bad_flags = self.bad_flags[(mask==False)]
 		
 		dap_all = pyfits.open(path_to_dapall)
 		get = np.where(dap_all[1].data['PLATEIFU']==str(plate_number)+'-'+str(ifu_number))
@@ -146,23 +200,32 @@ class firefly_setup:
 			
 		sys_vel = maps_header[0].header['SCINPVEL']
 		bin_vel = maps_header['STELLAR_VEL'].data[x_position,y_position]	
-	
-		if np.abs(redshift*c-sys_vel)>1:
-			print('The are problems with the redshift estimate.')
-			print('c*STELLAR_Z = '+str(redshift*c)+', sys_vel = '+str(sys_vel))
-		
+			
 		if redshift<0:
-			print('There are problems with the redshift.')
+			print('WARNING: The redshift of this object is negative.')
 			print('z = {}'.format(redshift))
 		
 		redshift_corr = (sys_vel+bin_vel)/c
 		self.redshift = redshift
 		self.restframe_wavelength = self.wavelength / (1.0+redshift_corr)
+		
+#		mask = bit_mask[:,x_position,y_position]# | self.lines_mask
+#		self.wavelength = self.wavelength[(mask==False)] 
+#		self.flux = self.flux[(mask==False)] 
+#		self.error = self.error[(mask==False)]
+#		self.bad_flags = self.bad_flags[(mask==False)]
+		
+		self.mask_emissionlines(emlines)
+		self.wavelength = self.wavelength[(self.lines_mask==False)] 
+		self.restframe_wavelength = self.restframe_wavelength[(self.lines_mask==False)] 
+		self.flux = self.flux[(self.lines_mask==False)] 
+		self.error = self.error[(self.lines_mask==False)]
+		self.bad_flags = self.bad_flags[(self.lines_mask==False)]
 					
 		# Get Trust flag, object_id, xpos, ypos and instrumental resolution.
 		self.trust_flag, self.objid, self.r_instrument = True, 0, np.loadtxt(os.path.join(os.environ['FF_DIR'],'data/MaNGA_spectral_resolution.txt'))
 		self.r_instrument = self.r_instrument[0:self.r_instrument.shape[0]//2]
-		self.r_instrument = self.r_instrument[(mask==False)]
+		self.r_instrument = self.r_instrument[(self.lines_mask==False)]
 		self.xpos, self.ypos = ra, dec
 		
 		# gets the amount of MW reddening on the models

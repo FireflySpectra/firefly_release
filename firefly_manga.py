@@ -44,14 +44,33 @@ suffix = ''
 # define plate number, IFU number, bin number
 plate = 8080
 ifu = 12701
-bin_number = 'all' #'all' if entire IFU, otherwise bin number
+bin_number = 0 #'all' if entire IFU, otherwise bin number
 
 # masking emission lines
 # defines size of mask in pixels
 # set to value>0 for masking (20 recommended), otherwise 0
-N_angstrom_masked=0 
-# set wavelength bins to be masked
-#lines_mask = ((restframe_wavelength > 3728 - N_angstrom_masked) & (restframe_wavelength < 3728 + N_angstrom_masked)) | ((restframe_wavelength > 5007 - N_angstrom_masked) & (restframe_wavelength < 5007 + N_angstrom_masked)) | ((restframe_wavelength > 4861 - N_angstrom_masked) & (restframe_wavelength < 4861 + N_angstrom_masked)) | ((restframe_wavelength > 6564 - N_angstrom_masked) & (restframe_wavelength < 6564 + N_angstrom_masked)) 
+N_angstrom_masked=20 
+# set emission lines to be masked, comment-out lines that should not be masked
+emlines = [
+						'He-II',# 'He-II:  3202.15A, 4685.74'
+						'Ne-V', #  'Ne-V:   3345.81, 3425.81'
+					    'O-II',#  'O-II:   3726.03, 3728.73'
+					    'Ne-III',# 'Ne-III: 3868.69, 3967.40'
+					    'H-ζ',#   'H-ζ:     3889.05'
+					    'H-ε', #  'H-ε:     3970.07'
+					    'H-δ',#   'H-δ:     4101.73'
+					    'H-γ',#   'H-γ:     4340.46'
+					    'O-III',# 'O-III:  4363.15, 4958.83, 5006.77'
+					    'Ar-IV',# 'Ar-IV:  4711.30, 4740.10'
+					    'H-β',#   'H-β:     4861.32'
+					    'N-I',#   'H-I:    5197.90, 5200.39'
+					    'He-I',#  'He-I:   5875.60'
+					    'O-I',#   'O-I:    6300.20, 6363.67'
+					    'N-II',#  'N-II:   6547.96, 6583.34'
+					    'H-α',#   'H-α:     6562.80'
+					    'S-II',#  'S-II:   6716.31, 6730.68'
+					    'Ar-III',#'Ar-III: 7135.67'
+						]
 
 # choose model: 'm11', 'MaStar')
 model_key = 'm11'
@@ -101,7 +120,7 @@ def f(i):
     spec = fs.firefly_setup(maps, milky_way_reddening=milky_way_reddening, \
                                   N_angstrom_masked=N_angstrom_masked,\
                                   hpf_mode=hpf_mode)
-    spec.openMANGASpectrum(logcube, dap_file, galaxy_bin_number, plate, ifu)
+    spec.openMANGASpectrum(logcube, dap_file, galaxy_bin_number, plate, ifu, emlines)
     
     age_min = age_limits[0]
     if type(age_limits[1])==str:
