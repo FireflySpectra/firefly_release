@@ -49,7 +49,7 @@ vdisp = 135.89957
 #instrumental resolution
 r_instrument = np.zeros(len(wavelength))
 for wi,w in enumerate(wavelength):
-	r_instrument[wi] = 1900
+	r_instrument[wi] = 2000
 
 # masking emission lines
 # defines size in \AA of mask in pixels
@@ -77,10 +77,12 @@ emlines = [
 					    'Ar-III',#'Ar-III: 7135.67'
 						]
 
-# choose model: 'm09', 'm11', 'MaStar'
+# choose model: 'm11', 'MaStar'
 model_key='MaStar'
 
 #model flavour
+# m11: 'MILES', 'STELIB', 'ELODIE', 'MARCS (kr IMF only)'
+# MaStar: 'Th-MaStar', 'E-MaStar'
 model_lib=['Th-MaStar']
 
 # choose IMF: 'kr' (Kroupa), 'ss' (Salpeter)
@@ -97,7 +99,6 @@ data_wave_medium='vacuum'
 #Firefly assumes flux units of erg/s/A/cm^2.
 #Choose factor in case flux is scaled
 #(e.g. flux_units=10**(-17) for SDSS)
-
 flux_units=10**(-17)
 
 #specify whether write results

@@ -48,7 +48,7 @@ vdisp = hdul[2].data['VDISP'][0]
 #instrumental resolution
 r_instrument = np.zeros(len(wavelength))
 for wi,w in enumerate(wavelength):
-	r_instrument[wi] = 1900
+	r_instrument[wi] = 2000
 
 # masking emission lines
 # defines size of mask in pixels
@@ -80,7 +80,7 @@ emlines = [
 model_key='MaStar'
 
 #model flavour
-# m11: 'MILES', 'STELIB', 'ELODIE', 'MARCS'
+# m11: 'MILES', 'STELIB', 'ELODIE', 'MARCS (kr IMF only)'
 # MaStar: 'Th-MaStar', 'E-MaStar'
 model_lib=['Th-MaStar']
 
@@ -110,7 +110,6 @@ milky_way_reddening=True
 hpf_mode = 'on' 
 # 'calzetti', 'allen', 'prevot' 
 dust_law = 'calzetti'
-
 
 # Only change the following parameters, if you know what you are doing.
 max_ebv = 1.5                   
