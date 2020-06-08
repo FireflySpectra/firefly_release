@@ -3,6 +3,7 @@
 .. moduleauthor:: Daniel Thomas <daniel.thomas__at__port.ac.uk>
 .. contributions:: Johan Comparat <johan.comparat__at__gmail.com>
 .. contributions:: Violeta Gonzalez-Perez <violegp__at__gmail.com>
+.. contributions:: Justus Neumann <jusneuma.astro__at__gmail.com>
 
 Firefly is initiated with this script. 
 All input data and parmeters are now specified in this one file.
@@ -27,34 +28,34 @@ cosmo = co.Planck15
 
 #input file with path to read in wavelength, flux and flux error arrays
 #the example is for an ascii file with extension 'ascii'
-input_file='example_data/spec-0266-51602-0001.fits'
-hdul = fits.open(input_file)
-suffix = ""		
+input_file='example_data/spec-0266-51602-0001.ascii'
+data = np.loadtxt(input_file, unpack=True)
+suffix = ""
 
 #redshift
-redshift = hdul[2].data['Z'][0]
+redshift = 0.021275453
 
-wavelength = 10**hdul[1].data['loglam']
-flux = hdul[1].data['flux']
-error = hdul[1].data['ivar']**(-0.5)
+wavelength = data[0,:]
+flux = data[1,:]
+error = data[2,:]
 restframe_wavelength = wavelength/(1+redshift)
 
 # RA and DEC
-ra=hdul[0].header['RA'] ; dec=hdul[0].header['DEC']
+ra=145.89219 ; dec=0.059372
 
 #velocity dispersion in km/s
-vdisp = hdul[2].data['VDISP'][0]
+vdisp = 135.89957
 
 #instrumental resolution
 r_instrument = np.zeros(len(wavelength))
 for wi,w in enumerate(wavelength):
-	r_instrument[wi] = 1900
+	r_instrument[wi] = 2000
 
 # masking emission lines
-# defines size of mask in pixels
+# defines size in \AA of mask in pixels
 # set to value>0 for masking (20 recommended), otherwise 0
 N_angstrom_masked=0
-# set wavelength bins to be masked
+# set emission lines to be masked, comment-out lines that should not be masked
 emlines = [
 						'He-II',# 'He-II:  3202.15A, 4685.74'
 						'Ne-V', #  'Ne-V:   3345.81, 3425.81'
@@ -76,11 +77,11 @@ emlines = [
 					    'Ar-III',#'Ar-III: 7135.67'
 						]
 
-# choose model: 'm11', 'MaStar')
+# choose model: 'm11', 'MaStar'
 model_key='MaStar'
 
 #model flavour
-# m11: 'MILES', 'STELIB', 'ELODIE', 'MARCS'
+# m11: 'MILES', 'STELIB', 'ELODIE', 'MARCS (kr IMF only)'
 # MaStar: 'Th-MaStar', 'E-MaStar'
 model_lib=['Th-MaStar']
 
@@ -91,7 +92,6 @@ imfs=['kr']
 # choose age in Gyr or 'AoU' for the age of the Universe
 age_limits = [0,'AoU']
 Z_limits = [-3.,3.]
-
 
 #specify whether data in air or vaccum
 data_wave_medium='vacuum'
@@ -106,18 +106,19 @@ write_results=True
 
 # set whether to correct for Milky Way reddening
 milky_way_reddening=True
+
 # set parameters for dust determination: 'on', 'hpf_only' (i.e. E(B-V)=0)
 hpf_mode = 'on' 
+
 # 'calzetti', 'allen', 'prevot' 
 dust_law = 'calzetti'
-
 
 # Only change the following parameters, if you know what you are doing.
 max_ebv = 1.5                   
 num_dust_vals = 200             
 dust_smoothing_length = 200 
 max_iterations = 10
-pdf_sampling = 300  
+pdf_sampling = 300 
 
 print('')
 print('Starting firefly ...')
@@ -134,10 +135,11 @@ else:
 Z_min=Z_limits[0]
 Z_max=Z_limits[1]
 
-#set output folder and output filename in firefly directory 
+#set output folder and output filename in firefly directory
 #and write output file
-outputFolder = os.path.join( os.getcwd(), 'output')
-output_file = os.path.join( outputFolder , 'spFly-' + os.path.basename( input_file )[0:-5] ) + ".fits"
+outputFolder = os.path.join( os.environ['FF_DIR'], 'output')
+output_file = os.path.join( outputFolder , 'spFly-' + os.path.basename( input_file )[0:-6] ) + ".fits"
+
 if os.path.isfile(output_file):
 	print()
 	print('Warning: This object has already been processed, the file will be over-witten.')
@@ -168,6 +170,7 @@ tables = [prihdu]
 spec=fs.firefly_setup(input_file,milky_way_reddening=milky_way_reddening, \
                                   N_angstrom_masked=N_angstrom_masked,\
                                   hpf_mode=hpf_mode)
+
 spec.openSingleSpectrum(wavelength, flux, error, redshift, ra, dec, vdisp, emlines, r_instrument)
 
 did_not_converge = 0.
@@ -181,6 +184,7 @@ try :
                                            dust_law=dust_law, max_ebv=max_ebv, num_dust_vals=num_dust_vals, \
                                            dust_smoothing_length=dust_smoothing_length,max_iterations=max_iterations, \
                                            pdf_sampling=pdf_sampling, flux_units=flux_units)
+
 
 	#initiate fit
 	model.fit_models_to_data()
@@ -198,4 +202,3 @@ if did_not_converge < 1 :
 print()
 print ("Done... total time:", int(time.time()-t0) ,"seconds.")
 print()
-

@@ -73,12 +73,12 @@ emlines = [
 						]
 
 # choose model: 'm11', 'MaStar')
-model_key = 'm11'
+model_key = 'MaStar'
 
 # model flavour
 # m11: 'MILES', 'STELIB', 'ELODIE', 'MARCS'
 # MaStar: 'Th-MaStar', 'E-MaStar'
-model_lib = ['MILES']
+model_lib = ['Th-MaStar']
 
 # choose IMF: 'kr' (Kroupa), 'ss' (Salpeter)
 imfs = ['kr']
@@ -101,7 +101,6 @@ milky_way_reddening=True
 hpf_mode = 'on' 
 # 'calzetti', 'allen', 'prevot' 
 dust_law = 'calzetti'
-
 
 # Only change the following parameters, if you know what you are doing.
 max_ebv = 1.5                   
