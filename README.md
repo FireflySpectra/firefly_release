@@ -29,10 +29,6 @@ astro dependencies: astropy, installable with pip
 git clone https://[username]@github.com/[username]/firefly_release
 ```
 
-### Stellar Population model templates 
-
-Simple stellar population (SSP) model templates from [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) (M11) and [MaStar](http://www.icg.port.ac.uk/mastar/) are now included in the package for two initial mass functions (Kroupa and Salpeter).
-
 ### Environmental variables
 Environmental variables are now pre-set in the code tied to the running directory. Alternatively, you may set the environmental variables as follows.
 
@@ -49,6 +45,26 @@ setenv FF_DIR '[your path to Firefly]/firefly_release'
 setenv PYTHONPATH ${PYTHONPATH}:${FF_DIR}/python
 setenv STELLARPOPMODELS_DIR '[your path to Firefly]/stellar_population_models'
 ```
+
+### How to run the code
+Use the following command in the directorty where you installed Firefly:
+```
+python run/firefly.py
+```
+or
+```
+python run/firefly_sdss.py
+```
+or
+```
+python run/firefly_manga.py
+```
+To modify the input spectrum and other parameters edit one of these three python scripts.
+
+
+## Stellar Population model templates 
+
+Simple stellar population (SSP) model templates from [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) (M11) and [MaStar](http://www.icg.port.ac.uk/mastar/) are now included in the package for two initial mass functions (Kroupa and Salpeter).
 
 ## Content of this repository
 
