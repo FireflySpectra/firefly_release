@@ -101,7 +101,7 @@ class StellarPopulationModel:
 		 #. Finally, it writes the output files
 
 	"""
-	def __init__(self, specObs, outputFile, cosmo, models = 'm11', model_libs = ['MILES_UVextended'], imfs = ['ss','kr'], hpf_mode = 'on', age_limits = [6,10.1], downgrade_models = True, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 10, fit_per_iteration_cap = 3, pdf_sampling = 300, data_wave_medium = 'vacuum', Z_limits = [-0.1,0.1], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
+	def __init__(self, specObs, outputFile, cosmo, models = 'MaStar', model_libs = ['Th-MaStar'], imfs = ['kr'], hpf_mode = 'on', age_limits = [0,15], downgrade_models = True, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 10, fit_per_iteration_cap = 1000, pdf_sampling = 300, data_wave_medium = 'vacuum', Z_limits = [-3,3], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
 		self.cosmo = cosmo
 		self.specObs = specObs
 		self.outputFile = outputFile
@@ -117,7 +117,7 @@ class StellarPopulationModel:
 		self.flux_units = flux_units
 		if self.models == 'm11':
 			for m in self.model_libs:
-				if m == 'MILES' or m == 'MILES_revisednearIRslope' or m == 'MILES_UVextended':
+				if m == 'MILES':
 					self.deltal_libs.append(2.55)
 				elif m == 'STELIB':
 					self.deltal_libs.append(3.40)
@@ -125,23 +125,14 @@ class StellarPopulationModel:
 					self.deltal_libs.append(0.55)
 				elif m == 'MARCS':
 					self.deltal_libs.append(0.1)
-
-		elif self.models=='bc03':
-			self.model_libs = ['STELIB_BC03']
-			imfs        = ['cha']
-			self.deltal_libs = [3.00]
-
-		elif self.models == 'm09':
-			self.model_libs = ['M09']
-			if downgrade_models:
-				self.deltal_libs = [0.4]
-			else:
-				self.deltal_libs = [3.6]
 				
 		elif self.models =='MaStar':
-			r_model = np.loadtxt(os.path.join(os.environ['FF_DIR'],'./data/MaStar_SSP_v0.1_resolution_lin.txt'))
+			model_path = os.environ['STELLARPOPMODELS_DIR']
+			ver='v0.2'
+			hdul=pyfits.open(model_path+'/MaStar_SSP_'+ver+'.fits.gz')
+			r_model=hdul[2].data[1,:]
 			# This provides R=lamba/delta_lambda as numpy ndarray. The params deltal_libs and deltal should probably be renamed. 
-			self.deltal_libs.append(r_model[:,1])
+			self.deltal_libs.append(r_model)
 			
 		# sets the Initial mass function
 		self.imfs = imfs
@@ -197,16 +188,16 @@ class StellarPopulationModel:
 			model_files = []
 			#print('yes we are in here')
 			#stop
-			if self.use_downgraded_models :
-				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES_downgraded','ssp_M11_' + model_used+ '.' + imf_used)
-				else:
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+ model_used + '_downgraded', 'ssp_M11_' +model_used +'.' + imf_used)
-			else:
-				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES', 'ssp_M11_'+model_used+'.'+imf_used)
-				else:
-					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+model_used ,'ssp_M11_' +model_used +'.' + imf_used)
+#			if self.use_downgraded_models :
+#				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
+#					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES_downgraded','ssp_M11_' + model_used+ '.' + imf_used)
+#				else:
+#					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+ model_used + '_downgraded', 'ssp_M11_' +model_used +'.' + imf_used)
+#			else:
+#				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
+#					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES', 'ssp_M11_'+model_used+'.'+imf_used)
+#				else:
+			model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+model_used ,'ssp_M11_' +model_used +'.' + imf_used)
 
 
 			# Constructs the metallicity array of models :
@@ -256,7 +247,7 @@ class StellarPopulationModel:
 				else:
 					raise NameError('Unrecognised metallicity! Check model file names.')
 
-				if znum>self.Z_limits[0] and znum<self.Z_limits[1]:
+				if znum>10**(self.Z_limits[0]) and znum<10**(self.Z_limits[1]):
 					metal_files.append(all_metal_files[z])
 					metal.append(znum)
 			#print(metal_files)
@@ -307,84 +298,10 @@ class StellarPopulationModel:
 			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
 			return wavelength, model_flux, age_model, metal_model
 
-		elif self.models == 'm09':
-			first_file  = True
-			model_files = []
-			if self.use_downgraded_models:
-				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'UVmodels_Marastonetal08b_downgraded')
-			else:
-				model_path = join(os.environ['STELLARPOPMODELS_DIR'],'UVmodels_Marastonetal08b')
-			# Gathers the list of models with metallicities and ages of interest:
-			all_metal_files = glob.glob(model_path+'*')
-			metal_files 	= []
-			metal 			= []
-			for z in range(len(all_metal_files)):
-				zchar = all_metal_files[z].split('.')[1][2:]
-				if zchar == 'z001':
-					#znum = -0.3
-					znum = 10**-0.3
-				elif zchar == 'z002':
-					#znum = 0.0
-					znum = 1.0
-				elif zchar == 'z004':
-					#znum = 0.3
-					znum = 10**0.3
-				elif zchar == 'z0001':
-					#znum = -1.300
-					znum = 10**-1.300
-				else:
-					raise NameError('Unrecognised metallicity! Check model file names.')
-
-				if znum>self.Z_limits[0] and znum<self.Z_limits[1]:
-					metal_files.append(all_metal_files[z])
-					metal.append(znum)
-
-			# constructs the model array
-			model_flux, age_model, metal_model = [],[],[]
-			for zi,z in enumerate(metal_files):
-				# print "Retrieving and downgrading models for "+z
-				model_table = pd.read_table(z,converters={'Age':np.float64}, header=None ,usecols=[0,2,3], names=['Age','wavelength_model','flux_model'], delim_whitespace=True)
-				age_data = np.unique(model_table['Age'].values.ravel())
-				for a in age_data:
-					logyrs_a = trylog10(a)+9.0
-					## print "age model selection:", self.age_limits[0], logyrs_a, self.age_limits[1]
-					if (((10**(logyrs_a-9)) < self.age_limits[0]) or ((10**(logyrs_a-9)) > self.age_limits[1])):
-						continue
-					else:
-						spectrum = model_table.loc[model_table.Age == a, ['wavelength_model', 'flux_model'] ].values
-						wavelength_int,flux = spectrum[:,0],spectrum[:,1]
-
-						# converts to air wavelength
-						if self.data_wave_medium == 'vacuum':
-							wavelength = airtovac(wavelength_int)
-						else:
-							wavelength = wavelength_int
-
-						# downgrades the model
-						if self.downgrade_models:
-							mf = downgrade(wavelength,flux,deltal,self.vdisp_round, wave_instrument, r_instrument)
-						else:
-							mf = copy.copy(flux)
-
-						# Reddens the models
-						if ebv_mw != 0:
-							attenuations = unred(wavelength,ebv=0.0-ebv_mw)
-							model_flux.append(mf*attenuations)
-						else:
-							model_flux.append(mf)
-
-						age_model.append(a)
-						metal_model.append(metal[zi])
-						first_model = False
-
-			# print "Retrieved all models!"
-			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
-			return wavelength, model_flux, age_model, metal_model
-		
 		elif self.models =='MaStar':
 			
 			model_path = os.environ['STELLARPOPMODELS_DIR']
-			ver = 'v0.1'
+			ver = 'v0.2'
 			
 			lib = model_used
 			if imf_used == 'kr':
@@ -402,7 +319,13 @@ class StellarPopulationModel:
 			t=hdul[1].data[:,0,0,0]
 			Z=hdul[1].data[0,:,0,1]
 			s=hdul[1].data[0,0,:,2]
-			wavelength=hdul[2].data
+			#wavelength=hdul[2].data
+
+			if (ver=='v0.1'):
+				wavelength=hdul[2].data
+			else:
+				wavelength=hdul[2].data[0,:]
+
 			if (lib=='Th-MaStar'):
 				fluxgrid=hdul[3].data
 			if (lib=='E-MaStar'):

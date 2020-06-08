@@ -136,19 +136,17 @@ class firefly_setup:
 		self.trust_flag = 1
 		self.objid = 0
 		
-		self.mask_emissionlines(emlines)
-		self.bad_flags = self.bad_flags[(self.lines_mask==False)]
-		self.restframe_wavelength = self.restframe_wavelength[(self.lines_mask==False)] 
-		self.wavelength = self.wavelength[(self.lines_mask==False)] 
-		self.flux = self.flux[(self.lines_mask==False)]
-		self.error = self.error[(self.lines_mask==False)]
-		self.r_instrument = self.r_instrument[(self.lines_mask==False)]
-		
 		# removes the bad data from the spectrum 
 		self.bad_data = np.isnan(self.flux) | np.isinf(self.flux) | (self.flux <= 0.0) | np.isnan(self.error) | np.isinf(self.error)
-		self.flux[self.bad_data]     = 0.0
-		self.error[self.bad_data]     = np.max(self.flux) * 99999999999.9
-		self.bad_flags[self.bad_data] = 0
+		self.mask_emissionlines(emlines)
+		self.final_mask = (self.bad_data | self.lines_mask)
+
+		self.bad_flags = self.bad_flags[(self.final_mask==False)]
+		self.restframe_wavelength = self.restframe_wavelength[(self.final_mask==False)] 
+		self.wavelength = self.wavelength[(self.final_mask==False)]
+		self.flux = self.flux[(self.final_mask==False)]
+		self.error = self.error[(self.final_mask==False)]
+		self.r_instrument = self.r_instrument[(self.final_mask==False)]
 		        
 		if self.milky_way_reddening:
 		# gets the amount of MW reddening on the models
@@ -208,24 +206,21 @@ class firefly_setup:
 		redshift_corr = (sys_vel+bin_vel)/c
 		self.redshift = redshift
 		self.restframe_wavelength = self.wavelength / (1.0+redshift_corr)
-		
-#		mask = bit_mask[:,x_position,y_position]# | self.lines_mask
-#		self.wavelength = self.wavelength[(mask==False)] 
-#		self.flux = self.flux[(mask==False)] 
-#		self.error = self.error[(mask==False)]
-#		self.bad_flags = self.bad_flags[(mask==False)]
-		
+
+		bitmask = bit_mask[:,x_position,y_position]&2**0+2**1+2**2+2**3+2**4
 		self.mask_emissionlines(emlines)
-		self.wavelength = self.wavelength[(self.lines_mask==False)] 
-		self.restframe_wavelength = self.restframe_wavelength[(self.lines_mask==False)] 
-		self.flux = self.flux[(self.lines_mask==False)] 
-		self.error = self.error[(self.lines_mask==False)]
-		self.bad_flags = self.bad_flags[(self.lines_mask==False)]
+		self.final_mask = (bitmask | self.lines_mask)
+
+		self.wavelength = self.wavelength[(self.final_mask==False)] 
+		self.restframe_wavelength = self.restframe_wavelength[(self.final_mask==False)] 
+		self.flux = self.flux[(self.final_mask==False)] 
+		self.error = self.error[(self.final_mask==False)]
+		self.bad_flags = self.bad_flags[(self.final_mask==False)]
 					
 		# Get Trust flag, object_id, xpos, ypos and instrumental resolution.
 		self.trust_flag, self.objid, self.r_instrument = True, 0, np.loadtxt(os.path.join(os.environ['FF_DIR'],'data/MaNGA_spectral_resolution.txt'))
 		self.r_instrument = self.r_instrument[0:self.r_instrument.shape[0]//2]
-		self.r_instrument = self.r_instrument[(self.lines_mask==False)]
+		self.r_instrument = self.r_instrument[(self.final_mask==False)]
 		self.xpos, self.ypos = ra, dec
 		
 		# gets the amount of MW reddening on the models
