@@ -60,17 +60,15 @@ def trylog10(value):
 class StellarPopulationModel:
 	"""
 	:param specObs: specObs observed spectrum object initiated with the  GalaxySpectrumFIREFLY class.
-	:param models: choose between 'MaStar', 'm11', 'bc03' or 'm09'.
+	:param models: choose between 'MaStar', 'm11'
 
 		* MaStar corresponds to Maraston et al. 2020 <https://ui.adsabs.harvard.edu/abs/2019arXiv191105748M>
 		* m11 corresponds to all the models compared in `Maraston and Stromback 2011  <http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M>`_.
-		* m09 to `Maraston et al. 2009 <http://adsabs.harvard.edu/abs/2009A%26A...493..425M>`_.
-		* bc03 to the `Bruzual and Charlot 2003 models <http://adsabs.harvard.edu/abs/2003MNRAS.344.1000B>`_.
 
 	:param model_libs: only necessary if using m11 or MaStar.
 	Choose between `MILES <http://adsabs.harvard.edu/abs/2011A%26A...532A..95F>`_, MILES revisednearIRslope, MILES UVextended, `STELIB <http://adsabs.harvard.edu/abs/2003A%26A...402..433L>`_, `ELODIE <http://adsabs.harvard.edu/abs/2007astro.ph..3658P>`_, `MARCS <http://adsabs.harvard.edu/abs/2008A%26A...486..951G>`_.
 
-		* MILES, MILES revisednearIRslope, MILES UVextended, STELIB, ELODIE are empirical libraries.
+		* MILES, MILES, STELIB, ELODIE are empirical libraries.
 		* MARCS is a theoretical library.
 		
 	For MaStar models choose between 'E-MaStar' or 'Th-MaStar'.
@@ -82,7 +80,6 @@ class StellarPopulationModel:
 
 		* 'ss' for `Salpeter <http://adsabs.harvard.edu/abs/1955ApJ...121..161S>`_or
 		* 'kr' for `Kroupa <http://adsabs.harvard.edu/cgi-bin/bib_query?arXiv:1112.3340>`_ or
-		* 'cha' for `Chabrier <http://adsabs.harvard.edu/abs/2003PASP..115..763C>`_ (not supported for MaStar models).
 
 	:param hpf_mode: 'on' means the code uses HPF to dereden the spectrum, if 'hpf_only' then EBV=0.
 
@@ -107,7 +104,7 @@ class StellarPopulationModel:
 		self.outputFile = outputFile
 		#################### STARTS HERE ####################
 		# sets the models
-		self.models = models # m11/bc03 / m09/MaStar
+		self.models = models # m11/MaStar
 		self.model_libs = model_libs
 		self.suffix = suffix
 		self.deltal_libs = []
