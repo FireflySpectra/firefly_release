@@ -1,12 +1,12 @@
 # Firefly
 ## Fitting Iteratively for Relative Likelihood Analysis (of Stellar Population Spectra, e.g. galaxies, star clusters, model spectra)
-<img align="right" src="doc/example_data/spectra/FF-fit-example.png">
+<img align="right" src="data/FF-fit-example.png">
 
 [FIREFLY](http://www.icg.port.ac.uk/firefly/) is a chi-squared minimisation fitting code for deriving the stellar population properties of stellar systems, be these observed galaxy or star cluster spectra, or model spectra from simulations. [FIREFLY](http://www.icg.port.ac.uk/firefly/) fits combinations of single-burst stellar population models to spectroscopic data, following an iterative best-fitting process controlled by the Bayesian Information Criterion. No priors are applied, rather all solutions within a statistical cut are retained with their weight, which is arbitrary. Moreover, no additive or multiplicative polynomia are employed to adjust the spectral shape and no regularisation is imposed. This fitting freedom allows one to map out the effect of intrinsic spectral energy distribution (SED) degeneracies, such as age, metallicity, dust reddening on stellar population properties, and to quantify the effect of varying input model components on such properties. Dust attenuation is included using a new procedure, which employs a High-Pass Filter (HPF) in order to rectify the continuum before fitting. The returned attenuation array is then matched to known analytical approximations to return an E(B-V) value. This procedure allows for removal of large scale modes of the spectrum associated with dust and/or poor flux calibration. The fitting method has been extensively tested with a comprehensive suite of mock galaxies, real galaxies from the Sloan Digital Sky Survey and Milky Way globular clusters. The robustness of the derived properties was assessed as a function of signal-to-noise ratio and adopted wavelength range. [FIREFLY](http://www.icg.port.ac.uk/firefly/) is able to recover age, metallicity, stellar mass and even the star formation history remarkably well down to a S/N~5, for moderately dusty systems. 
 
 [FIREFLY](http://www.icg.port.ac.uk/firefly/) provides light- and mass-weighted stellar population properties - age, metallicity, E(B-V), stellar mass and its partition in remnants (white dwarfs, neutron stars, black-holes) - for the best fitting model and its components. The star formation rates for the individual components are given, the total past average can be easily obtained from the provided quantities. The star formation history can be easily derived by plotting the SSP contributions with their weights. Errors on these properties are obtained by the likelihood of solutions within the statistical cut. 
 
-The code can in principle fit any model to any spectrum at any spectral resolution and over any wavelength range. At present, the code has been applied to spectra from SDSS, integrated and from Integral field Unit (MANGA), the DEEP2 survey and globular clusters from various sources. The full documentation of the Python code generated with Sphynx can be found [here](http://www.mpe.mpg.de/~comparat/firefly_doc/).
+The code can in principle fit any model to any spectrum at any spectral resolution and over any wavelength range. At present, the code has been applied to spectra from SDSS, integrated and from Integral field Unit (MANGA), the DEEP2 survey and globular clusters from various sources.
 
 In this newest version we inlcuded a number of bug fixes and updates as documented on Github. The file structure also has been streamlined.
 
@@ -18,15 +18,16 @@ We are delighted you use our code! If you use our code, please cite the followin
 * [Comparat et al. 2018](https://arxiv.org/abs/1711.06575) for description of the SDSS-IV DR14 run and testing of the code performance.
 * [Goddard et al. 2017](https://ui.adsabs.harvard.edu/abs/2017MNRAS.466.4731G) for description of the SDSS-IV/MANGA run and testing of the code performance.
 * [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) for the stellar population models.
+* [Maraston et al 2020](https://ui.adsabs.harvard.edu/abs/2020MNRAS.tmp.1662M) for the MaStar stellar population models.
 
 
 ## Installation
 
-Requirements: python 2 or 3 and its main packages all installable through pip: numpy, scipy, matplotlib, math ...
+Requirements: python 3 and its main packages all installable through pip: numpy, scipy, matplotlib, math ...
 astro dependencies: astropy, installable with pip
 
 ```
-git clone https://[username]@github.com/[username]/firefly_release
+git clone https://github.com/FireflySpectra/firefly_release
 ```
 
 ### Environmental variables
