@@ -206,33 +206,33 @@ class StellarPopulationModel:
 			#stop	
 			## # print all_metal_files
 			metal_files 	= []
-			metal 	    = []
+			metal 	    = [] #[-2.25, -1.35, -0.33, 0, 0.35]
 			for z in range(len(all_metal_files)):
 				zchar = all_metal_files[z][len(model_path):]
 				if zchar == 'z001':
 					#znum = -0.3
-					znum = 0.5
+					znum = 10**(-0.33) #0.5
 				elif zchar == 'z002':
 					#znum = 0.0
-					znum = 1.0
+					znum = 10**(0) #1.0
 				elif zchar == 'z004':
 					#znum = 0.3
-					znum = 2.0
+					znum = 10**(0.35) #2.0
 				elif zchar == 'z0001.bhb':
 					#znum = -1.301
-					znum = 10**-1.301
+					znum = 10**(-1.35) #10**-1.301
 				elif zchar == 'z0001.rhb':
 					#znum = -1.302
-					znum = 10**-1.302
+					znum = 10**(-1.35) #10**-1.302
 				elif zchar == 'z10m4.bhb':
 					#znum = -2.301
-					znum = 10**-2.301
+					znum = 10**(-2.25) #10**-2.301
 				elif zchar == 'z10m4.rhb':
 					#znum = -2.302
-					znum = 10**-2.302
+					znum = 10**(-2.25) #10**-2.302
 				elif zchar == 'z10m4':
 					#znum = -2.300
-					znum = 10**-2.300
+					znum = 10**(-2.25) #10**-2.300
 				elif zchar == 'z-0.6':
 					znum = 10**-0.6
 				elif zchar == 'z-0.9':
@@ -320,10 +320,8 @@ class StellarPopulationModel:
 			s=hdul[1].data[0,0,:,2]
 			#wavelength=hdul[2].data
 
-			if (ver=='v0.1'):
-				wavelength=hdul[2].data
-			else:
-				wavelength=hdul[2].data[0,:]
+
+			wavelength=hdul[2].data[0,:]
 
 			if (lib=='Th-MaStar'):
 				fluxgrid=hdul[3].data
