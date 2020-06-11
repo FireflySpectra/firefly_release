@@ -27,8 +27,8 @@ t0=time.time()
 cosmo = co.Planck15
 
 #input file with path to read in wavelength, flux and flux error arrays
-#the example is for an ascii file with extension 'ascii'
-input_file='example_data/spec-0266-51602-0001.ascii'
+#the example is for an ascii file with extension 'dat'
+input_file='example_data/spec-0266-51602-0001.dat'
 data = np.loadtxt(input_file, unpack=True)
 suffix = ""
 
@@ -138,7 +138,7 @@ Z_max=Z_limits[1]
 #set output folder and output filename in firefly directory
 #and write output file
 outputFolder = os.path.join( os.environ['FF_DIR'], 'output')
-output_file = os.path.join( outputFolder , 'spFly-' + os.path.basename( input_file )[0:-6] ) + ".fits"
+output_file = os.path.join( outputFolder , 'spFly-' + os.path.basename( input_file )[0:-4] ) + ".fits"
 
 if os.path.isfile(output_file):
 	print()
