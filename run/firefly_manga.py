@@ -9,8 +9,6 @@ General purpose:
 ................
 
 Reads in a MaNGA datacube and analyses each spectrum from Voronoi binned spectra.
-Run this script by calling > python firefly_manga.py <txt_file>.
-The text file should specify in one line, space-separated: <plate number> <ifu number> <bin number>.
 The bin number is optional and should only be given if only a single bin is meant to be fitted.
 
 """

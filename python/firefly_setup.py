@@ -8,27 +8,28 @@ The class firefly_setup is dedicated to handling spectra to be fed to FIREFLY fo
 *Imports*::
 	import numpy as np
 	import astropy.io.fits as pyfits
-	import glob
-	from firefly_dust import get_dust_radec
+	import os
+	from firefly_dust import get_dust_radec	
+	import astropy.cosmology as cc
+	import astropy.units as uu
+	import astropy.constants as const
 """
 
 import numpy as np
 import astropy.io.fits as pyfits
-import glob
-import sys,os
+import os
 from firefly_dust import get_dust_radec
 
 import astropy.cosmology as cc
 cosmo = cc.Planck15
 import astropy.units as uu
-import cmath
 import astropy.constants as const
 
 class firefly_setup:
 	"""
 	Loads the environnement to transform observed spectra into the input for FIREFLY. 
 	
-	Currently SDSS spectra, speclite format is handled as well as stacks from the VVDS and the DEEP2 galaxy surveys.
+	Currently SDSS spectra, speclite format is handled as well as input data from the MaNGA survey.
 	:param path_to_spectrum: path to the spectrum
 	:param milky_way_reddening: True if you want to correct from the Milky way redenning using the Schlegel 98 dust maps.
 	:param hpf_mode: models the dust attenuation observed in the spectrum using high pass filter.
@@ -158,7 +159,6 @@ class firefly_setup:
 
 	def openMANGASpectrum(self, path_to_logcube, path_to_dapall, bin_number, plate_number, ifu_number, emlines):
 		"""Loads an observed MaNGA spectrum in.
-		:param data_release: Must specify which data release of MaNGA you are using, as file structure has changed.
 		:param path_to_logcube: Must specify the path to logcube (if using MPL5 or higher). Set to 0 otherwise.		
 		"""
 		

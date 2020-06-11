@@ -18,7 +18,9 @@ It gathers all inputs : from the model and from the data.
 	import astropy.units as u
 	import glob
 	import pandas as pd
-	import os
+	import os,sys
+	import copy
+	from firefly_estimations_3d import estimation
 	from firefly_instrument import *
 	from firefly_dust import *
 	from firefly_fitter import *
@@ -59,7 +61,7 @@ def trylog10(value):
 
 class StellarPopulationModel:
 	"""
-	:param specObs: specObs observed spectrum object initiated with the  GalaxySpectrumFIREFLY class.
+	:param specObs: specObs observed spectrum object initiated with the firefly_setup class.
 	:param models: choose between 'MaStar', 'm11'
 
 		* MaStar corresponds to Maraston et al. 2020 <https://ui.adsabs.harvard.edu/abs/2019arXiv191105748M>
@@ -158,7 +160,7 @@ class StellarPopulationModel:
 		takes the base models in their native form and converts to downgraded files.
 
 		:param model_used: list of models to be used, for example ['m11', 'm09'].
-		:param imf_used: list of imf to be used, for example ['ss', 'cha'].
+		:param imf_used: list of imf to be used, for example ['ss', 'kr'].
 		:param deltal: delta lambda in the models.
 		:param vdisp: velocity dispersion observed in the galaxy.
 		:param wave_instrument: wavelength array from the observations
@@ -167,7 +169,7 @@ class StellarPopulationModel:
 
 		Workflow
 		----------
-			A. loads the models m11 or m09: maps parameters to the right files. Then it constructs the model array. Finally converts wavelengths to air or vacuum.
+			A. loads the models m11 or MaStar: maps parameters to the right files. Then it constructs the model array. Finally converts wavelengths to air or vacuum.
 			B. downgrades the model to match data resolution
 			C. applies attenuation
 			D. stores models in
@@ -391,7 +393,7 @@ class StellarPopulationModel:
 				#print(len(model_wave_int), len(model_flux_int), len(age), len(metal))
 				wave, data_flux, error_flux, model_flux_raw = match_data_models( self.specObs.restframe_wavelength, self.specObs.flux, self.specObs.bad_flags, self.specObs.error, model_wave_int, model_flux_int, self.wave_limits[0], self.wave_limits[1], saveDowngradedModel = False)
 				#print("model: w,f,fe,fr", len(wave), len(data_flux), len(error_flux), len(model_flux_raw))
-				self.matched_wave = model_wave_int
+				self.matched_wave = wave
 				self.matched_model_flux_raw = model_flux_raw
 				# C. normalises the models to the median value of the model [erg/s/A/Msun]
 				# print "Normalising the models"
