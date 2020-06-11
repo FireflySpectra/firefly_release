@@ -82,7 +82,7 @@ model_key='MaStar'
 #model flavour
 # m11: 'MILES', 'STELIB', 'ELODIE', 'MARCS (kr IMF only)'
 # MaStar: 'Th-MaStar', 'E-MaStar'
-model_lib=['Th-MaStar']
+model_lib=['E-MaStar']
 
 # choose IMF: 'kr' (Kroupa), 'ss' (Salpeter)
 imfs=['kr']
