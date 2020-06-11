@@ -17,7 +17,7 @@ We are delighted you use our code! If you use our code, please cite the followin
 * [Wilkinson et al. 2017](http://adsabs.harvard.edu/abs/2017MNRAS.472.4297W) for the code, its description and testing.
 * [Comparat et al. 2018](https://arxiv.org/abs/1711.06575) for description of the SDSS-IV DR14 run and testing of the code performance.
 * [Goddard et al. 2017](https://ui.adsabs.harvard.edu/abs/2017MNRAS.466.4731G) for description of the SDSS-IV/MANGA run and testing of the code performance.
-* [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) for the stellar population models.
+* [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) for the M11 stellar population models.
 * [Maraston et al 2020](https://ui.adsabs.harvard.edu/abs/2020MNRAS.tmp.1662M) for the MaStar stellar population models.
 
 
@@ -60,8 +60,11 @@ or
 ```
 python run/firefly_manga.py
 ```
-To modify the input spectrum and other parameters edit one of these three python scripts.
-
+To modify the input spectrum and other parameters edit one of these three python scripts. The script
+```
+python run/read_firefly.py
+```
+provides an example how to read in Firefly output.
 
 ## Stellar Population model templates 
 
