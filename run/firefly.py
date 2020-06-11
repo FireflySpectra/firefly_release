@@ -27,7 +27,7 @@ t0=time.time()
 cosmo = co.Planck15
 
 #input file with path to read in wavelength, flux and flux error arrays
-#the example is for an ascii file with extension 'ascii'
+#the example is for an ascii file with extension 'dat'
 input_file='example_data/spec-0266-51602-0001.dat'
 data = np.loadtxt(input_file, unpack=True)
 suffix = ""

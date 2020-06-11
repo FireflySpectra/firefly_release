@@ -60,11 +60,10 @@ or
 ```
 python run/firefly_manga.py
 ```
-To modify the input spectrum and other parameters edit one of these three python scripts. The script
+To modify the input spectrum and other parameters edit one of these three python scripts. The following script provides an example how to read in Firefly output:
 ```
 python run/read_firefly.py
 ```
-provides an example how to read in Firefly output.
 
 ## Stellar Population model templates 
 
