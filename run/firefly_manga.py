@@ -36,7 +36,7 @@ cosmo = co.Planck15
 logcube_dir = 'example_data/manga/'
 maps_dir = 'example_data/manga/'
 output_dir = 'output/manga/'
-dap_file = 'example_data/manga/dapall-v2_4_3-2.2.1.fits'
+dap_file = 'example_data/manga/dapall-v3_1_1-3.1.0.fits'	# For DR15 use dapall-v2_4_3-2.2.1.fits
 suffix = ''
 
 # define plate number, IFU number, bin number
@@ -44,10 +44,15 @@ plate = 8080
 ifu = 12701
 bin_number = 0 #'all' if entire IFU, otherwise bin number
 
+# define MaNGA Product Launch (MPL) to use
+# mpl-11 = DR17 final data realease (recommended)
+# mpl-7 = DR15
+mpl = 'mpl-11'
+
 # masking emission lines
 # defines size of mask in pixels
 # set to value>0 for masking (20 recommended), otherwise 0
-N_angstrom_masked=20 
+N_angstrom_masked=0 
 # set emission lines to be masked, comment-out lines that should not be masked
 emlines = [
 						'He-II',# 'He-II:  3202.15A, 4685.74'
@@ -70,13 +75,13 @@ emlines = [
 					    'Ar-III',#'Ar-III: 7135.67'
 						]
 
-# choose model: 'm11', 'MaStar')
+# choose model: 'm11','m11-sg','MaStar')
 model_key = 'MaStar'
 
 # model flavour
 # m11: 'MILES', 'STELIB', 'ELODIE', 'MARCS'
-# MaStar: 'Th-MaStar', 'E-MaStar'
-model_lib = ['E-MaStar']
+# MaStar: 'gold'
+model_lib = ['gold']
 
 # choose IMF: 'kr' (Kroupa), 'ss' (Salpeter)
 imfs = ['kr']
@@ -113,11 +118,11 @@ pdf_sampling = 300
 def f(i):
     galaxy_bin_number  = i
     print('Fitting bin number {}'.format(i))
-    output_file = direc+'/spFly-'+str(plate)+'-'+str(ifu)+'-bin'+str(i)+'.fits'
+    output_file = direc+'/spFly-'+str(plate)+'-'+str(ifu)+'-bin'+str(i)
     spec = fs.firefly_setup(maps, milky_way_reddening=milky_way_reddening, \
                                   N_angstrom_masked=N_angstrom_masked,\
                                   hpf_mode=hpf_mode)
-    spec.openMANGASpectrum(logcube, dap_file, galaxy_bin_number, plate, ifu, emlines)
+    spec.openMANGASpectrum(logcube, dap_file, galaxy_bin_number, plate, ifu, emlines, mpl=mpl)
     
     age_min = age_limits[0]
     if type(age_limits[1])==str:
@@ -156,8 +161,9 @@ print('Starting firefly ...')
 print('Plate = {}, IFU = {}'.format(plate,ifu))
 
 # Set MAPS and LOGCUBE paths.
-logcube = os.path.join(logcube_dir,'manga-'+str(plate)+'-'+str(ifu)+'-LOGCUBE-VOR10-GAU-MILESHC.fits.gz')
-maps = os.path.join(maps_dir,'manga-'+str(plate)+'-'+str(ifu)+'-MAPS-VOR10-GAU-MILESHC.fits.gz')
+# For DR17 use defaul, for DR15 use '[...]VOR10-GAU-MILESHC.fits.gz'
+logcube = os.path.join(logcube_dir,str(plate),str(ifu),'manga-'+str(plate)+'-'+str(ifu)+'-LOGCUBE-VOR10-MILESHC-MASTARSSP.fits.gz')
+maps = os.path.join(maps_dir,str(plate),str(ifu),'manga-'+str(plate)+'-'+str(ifu)+'-MAPS-VOR10-MILESHC-MASTARSSP.fits.gz')
 
 # Create output path if it doesn't exist.
 direc = os.path.join(output_dir,str(plate),str(ifu))
@@ -170,8 +176,9 @@ unique_bin_number = list(np.unique(maps_header['BINID'].data)[1:])
 print('Number of bins = {}'.format(len(unique_bin_number)))
 
 if bin_number=='all':
-  N = f_mp(unique_bin_number)
+    N = f_mp(unique_bin_number)
+
 else:
-  f(bin_number)
+    f(bin_number)
 
 print('Time to complete: ', (time.time())-t0)

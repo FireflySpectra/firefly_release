@@ -114,7 +114,7 @@ class StellarPopulationModel:
 		self.use_downgraded_models = use_downgraded_models
 		self.write_results = write_results
 		self.flux_units = flux_units
-		if self.models == 'm11':
+		if (self.models == 'm11') or (self.models == 'm11-sg'):
 			for m in self.model_libs:
 				if m == 'MILES':
 					self.deltal_libs.append(2.55)
@@ -127,7 +127,7 @@ class StellarPopulationModel:
 				
 		elif self.models =='MaStar':
 			model_path = os.environ['STELLARPOPMODELS_DIR']
-			ver='v0.2'
+			ver='v1.1'
 			hdul=pyfits.open(model_path+'/MaStar_SSP_'+ver+'.fits.gz')
 			r_model=hdul[2].data[1,:]
 			# This provides R=lamba/delta_lambda as numpy ndarray. The params deltal_libs and deltal should probably be renamed. 
@@ -181,6 +181,119 @@ class StellarPopulationModel:
 			and returns it as well
 
 		"""
+
+		if self.models == 'm11-sg':
+			first_file  = True
+			model_files = []
+			#print('yes we are in here')
+			#stop
+#			if self.use_downgraded_models :
+#				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
+#					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES_downgraded','ssp_M11_' + model_used+ '.' + imf_used)
+#				else:
+#					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+ model_used + '_downgraded', 'ssp_M11_' +model_used +'.' + imf_used)
+#			else:
+#				if model_used == 'MILES_UVextended' or model_used == 'MILES_revisedIRslope':
+#					model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_MILES', 'ssp_M11_'+model_used+'.'+imf_used)
+#				else:
+			model_path 		= join(os.environ['STELLARPOPMODELS_DIR'],'SSP_M11_'+model_used+'_SG' ,'ssp_M11_' +model_used +'.' + imf_used)
+
+
+			# Constructs the metallicity array of models :
+			all_metal_files = sorted(glob.glob(model_path+'*'))
+			#print(model_path)
+			#print(all_metal_files)
+			#stop	
+			## # print all_metal_files
+			metal_files 	= []
+			metal 	    = [] #[-2.25, -1.35, -0.33, 0, 0.35]
+			for z in range(len(all_metal_files)):
+				zchar = all_metal_files[z][len(model_path):]
+				if zchar == 'z001.sg':
+					znum = 10**(-0.33) 
+				elif zchar == 'z002.sg':
+					znum = 10**(0) 
+				elif zchar == 'z004.sg':
+					znum = 10**(0.35)
+				elif zchar == 'z0001.bhb.sg':
+					#znum = -1.301
+					znum = 10**(-1.35) #10**-1.301
+				elif zchar == 'z0001.rhb.sg':
+					#znum = -1.302
+					znum = 10**(-1.35) #10**-1.302
+				#elif zchar == 'z10m4.bhb':
+					#znum = -2.301
+					#znum = 10**(-2.25) #10**-2.301
+				#elif zchar == 'z10m4.rhb':
+					#znum = -2.302
+					#znum = 10**(-2.25) #10**-2.302
+				#elif zchar == 'z10m4':
+					#znum = -2.300
+					#znum = 10**(-2.25) #10**-2.300
+				elif zchar == 'z0p25.sg':
+					znum = 10**0.25
+				elif zchar == 'zm0p7.bhb.sg':
+					znum = 10**-0.7
+				elif zchar == 'zm0p7.rhb.sg':
+					znum = 10**-0.7
+				elif zchar == 'zm1p0.bhb.sg':
+					znum = 10**-1.0
+				elif zchar == 'zm1p0.rhb.sg':
+					znum = 10**-1.0
+				else:
+					raise NameError('Unrecognised metallicity! Check model file names.')
+
+				if znum>10**(self.Z_limits[0]) and znum<10**(self.Z_limits[1]):
+					metal_files.append(all_metal_files[z])
+					metal.append(znum)
+			#print(metal_files)
+			#stop
+			# constructs the model array
+			model_flux, age_model, metal_model = [],[],[]
+			for zi,z in enumerate(metal_files):
+				# print "Retrieving and downgrading models for "+z
+				model_table = pd.read_table(z,converters={'Age':np.float64}, header=None ,usecols=[0,2,3], names=['Age','wavelength_model','flux_model'], delim_whitespace=True)
+				age_data = np.unique(model_table['Age'].values.ravel())
+#				print(age_data)
+#				stop
+				for a in age_data:
+					logyrs_a = trylog10(a)+9.0
+					## print "age model selection:", self.age_limits[0], logyrs_a, self.age_limits[1]
+					if (((10**(logyrs_a-9)) < self.age_limits[0]) or ((10**(logyrs_a-9)) > self.age_limits[1])):
+						continue
+					else:
+						spectrum = model_table.loc[model_table.Age == a, ['wavelength_model', 'flux_model'] ].values
+						wavelength_int,flux = spectrum[:,0],spectrum[:,1]
+
+						# converts to air wavelength
+						if self.data_wave_medium == 'vacuum':
+							wavelength = airtovac(wavelength_int)
+						else:
+							wavelength = wavelength_int
+
+						# downgrades the model
+						if self.downgrade_models:
+							mf = downgrade(wavelength,flux,deltal,self.specObs.vdisp, wave_instrument, r_instrument)
+						else:
+							mf = copy.copy(flux)
+
+						# Reddens the models
+						if ebv_mw != 0:
+							attenuations = unred(wavelength,ebv=0.0-ebv_mw)
+							model_flux.append(mf*attenuations)
+						else:
+							model_flux.append(mf)
+
+						age_model.append(a)
+						metal_model.append(metal[zi])
+						first_model = False
+			#print(wavelength)
+			#stop
+
+			# print "Retrieved all models!"
+			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
+			return wavelength, model_flux, age_model, metal_model
+
 		# first the m11 case
 		if self.models == 'm11':
 			first_file  = True
@@ -276,7 +389,7 @@ class StellarPopulationModel:
 
 						# downgrades the model
 						if self.downgrade_models:
-							mf = downgrade(wavelength,flux,deltal,self.vdisp_round, wave_instrument, r_instrument)
+							mf = downgrade(wavelength,flux,deltal,self.specObs.vdisp, wave_instrument, r_instrument)
 						else:
 							mf = copy.copy(flux)
 
@@ -300,7 +413,7 @@ class StellarPopulationModel:
 		elif self.models =='MaStar':
 			
 			model_path = os.environ['STELLARPOPMODELS_DIR']
-			ver = 'v0.2'
+			ver = 'v1.1'
 			
 			lib = model_used
 			if imf_used == 'kr':
@@ -323,10 +436,8 @@ class StellarPopulationModel:
 
 			wavelength=hdul[2].data[0,:]
 
-			if (lib=='Th-MaStar'):
+			if (lib=='gold'):
 				fluxgrid=hdul[3].data
-			if (lib=='E-MaStar'):
-				fluxgrid=hdul[4].data
 				
 			sidx = np.where(s==slope)[0][0]
 			
@@ -345,7 +456,7 @@ class StellarPopulationModel:
 					
 					# downgrades the model
 					if self.downgrade_models:
-						mf = downgrade(wavelength,flux,deltal,self.vdisp_round, wave_instrument, r_instrument)
+						mf = downgrade(wavelength,flux,deltal,self.specObs.vdisp, wave_instrument, r_instrument)
 					else:
 						mf = copy.copy(flux)
 					
