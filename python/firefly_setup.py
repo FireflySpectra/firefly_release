@@ -157,7 +157,7 @@ class firefly_setup:
 		#print(self.ebv_mw)	
 
 
-	def openMANGASpectrum(self, path_to_logcube, path_to_dapall, bin_number, plate_number, ifu_number, emlines):
+	def openMANGASpectrum(self, path_to_logcube, path_to_dapall, bin_number, plate_number, ifu_number, emlines,mpl='mpl-9'):
 		"""Loads an observed MaNGA spectrum in.
 		:param path_to_logcube: Must specify the path to logcube (if using MPL5 or higher). Set to 0 otherwise.		
 		"""
@@ -170,8 +170,15 @@ class firefly_setup:
 		
 		# Get S/N, right ascension and declination.
 		signal, ra, dec = maps_header['BIN_SNR'].data[x_position,y_position], maps_header[0].header['OBJRA'],maps_header[0].header['OBJDEC']
-		velocity_dispersion = maps_header['STELLAR_SIGMA'].data 		# DO NOT USE VELOCITY DISPERSION CORRECTION!
-		vdisp = velocity_dispersion[x_position,y_position]
+		velocity_dispersion = maps_header['STELLAR_SIGMA'].data 		# DO NOT USE VELOCITY DISPERSION CORRECTION!		
+		velocity_dispersion_correction = maps_header['STELLAR_SIGMACORR'].data[0,:,:]
+		
+		if velocity_dispersion[x_position,y_position] > velocity_dispersion_correction[x_position,y_position]:
+			correction = np.sqrt((velocity_dispersion[x_position,y_position])**2-(velocity_dispersion_correction[x_position,y_position])**2)
+			vdisp = correction
+		else:
+			vdisp = 0
+
 		
 		# Open LOGCUBE to get the flux, wavelength, and error
 		header = pyfits.open(path_to_logcube)
@@ -182,19 +189,30 @@ class firefly_setup:
 		output_flux = correct_flux - correct_flux_emline
 		correct_inverse_variance = inverse_variance[:, x_position, y_position]
 		
+		LSF = header['LSF'].data[:,x_position,y_position]		# LSF given as sigma of Gaussian in Angstrom
+		sig2fwhm        = 2.0 * np.sqrt(2.0 * np.log(2.0))
+		LSF_FWHM = LSF*sig2fwhm
+		RES = wavelength/LSF_FWHM
+		
+		self.r_instrument = RES
 		self.error = np.sqrt(1.0/(correct_inverse_variance))
 		self.bad_flags = np.ones(len(output_flux))
 		self.flux = output_flux
 		self.vdisp = vdisp
+
+		if (mpl=='mpl-10') or (mpl=='mpl-11'):
+			ext=2
+		else:
+			ext=1
 		
 		dap_all = pyfits.open(path_to_dapall)
-		get = np.where(dap_all[1].data['PLATEIFU']==str(plate_number)+'-'+str(ifu_number))
+		get = np.where(dap_all[ext].data['PLATEIFU']==str(plate_number)+'-'+str(ifu_number))
 		c = const.c.value/1000
 		# Use redshift as measured from the stellar kinematics by the DAP.
-		redshift = dap_all[1].data['STELLAR_Z'][get][0]
+		redshift = dap_all[ext].data['STELLAR_Z'][get][0]
 		# If redshift measurement failed, use redshift estimate from NSA or ancillary programs.
 		if redshift<0:
-			redshift = dap_all[1].data['Z'][get][0]
+			redshift = dap_all[ext].data['Z'][get][0]
 			
 		sys_vel = maps_header[0].header['SCINPVEL']
 		bin_vel = maps_header['STELLAR_VEL'].data[x_position,y_position]	
@@ -218,8 +236,9 @@ class firefly_setup:
 		self.bad_flags = self.bad_flags[(self.final_mask==False)]
 					
 		# Get Trust flag, object_id, xpos, ypos and instrumental resolution.
-		self.trust_flag, self.objid, self.r_instrument = True, 0, np.loadtxt(os.path.join(os.environ['FF_DIR'],'data/MaNGA_spectral_resolution.txt'))
-		self.r_instrument = self.r_instrument[0:self.r_instrument.shape[0]//2]
+# 		self.trust_flag, self.objid, self.r_instrument = True, 0, np.loadtxt(os.path.join(os.environ['FF_DIR'],'data/MaNGA_spectral_resolution.txt'))
+		self.trust_flag, self.objid= True, 0
+# 		self.r_instrument = self.r_instrument[0:self.r_instrument.shape[0]//2]
 		self.r_instrument = self.r_instrument[(self.final_mask==False)]
 		self.xpos, self.ypos = ra, dec
 		
