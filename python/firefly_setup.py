@@ -170,7 +170,7 @@ class firefly_setup:
 		
 		# Get S/N, right ascension and declination.
 		signal, ra, dec = maps_header['BIN_SNR'].data[x_position,y_position], maps_header[0].header['OBJRA'],maps_header[0].header['OBJDEC']
-		velocity_dispersion = maps_header['STELLAR_SIGMA'].data 		# DO NOT USE VELOCITY DISPERSION CORRECTION!		
+		velocity_dispersion = maps_header['STELLAR_SIGMA'].data 				
 		velocity_dispersion_correction = maps_header['STELLAR_SIGMACORR'].data[0,:,:]
 		
 		if velocity_dispersion[x_position,y_position] > velocity_dispersion_correction[x_position,y_position]:
