@@ -121,7 +121,7 @@ def f(i):
     output_file = direc+'/spFly-'+str(plate)+'-'+str(ifu)+'-bin'+str(i)
     spec = fs.firefly_setup(maps, milky_way_reddening=milky_way_reddening, \
                                   N_angstrom_masked=N_angstrom_masked,\
-                                  hpf_mode=hpf_mode)
+                                  hpf_mode=hpf_mode,data_wave_medium = data_wave_medium)
     spec.openMANGASpectrum(logcube, dap_file, galaxy_bin_number, plate, ifu, emlines, mpl=mpl)
     
     age_min = age_limits[0]

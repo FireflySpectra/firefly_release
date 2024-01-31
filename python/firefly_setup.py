@@ -19,6 +19,7 @@ import numpy as np
 import astropy.io.fits as pyfits
 import os
 from firefly_dust import get_dust_radec
+from firefly_library import airtovac
 
 import astropy.cosmology as cc
 cosmo = cc.Planck15
@@ -50,16 +51,18 @@ class firefly_setup:
 			* objid : object id optional : set to 0
 		
 	"""
-	def __init__(self,path_to_spectrum, milky_way_reddening=True , hpf_mode = 'on', N_angstrom_masked = 20.):
+	def __init__(self,path_to_spectrum, milky_way_reddening=True , hpf_mode = 'on', N_angstrom_masked = 20.,data_wave_medium='air'):
 		self.path_to_spectrum=path_to_spectrum
 		self.milky_way_reddening = milky_way_reddening
 		self.hpf_mode = hpf_mode
 		self.N_angstrom_masked = N_angstrom_masked
+		self.data_wave_medium = data_wave_medium
 
 	def mask_emissionlines(self, element_emission_lines):
 
 		"""
 		Firefly needs to mask emission lines of elements as this can affect the fitting.
+		The emission line dictionary is given in air wavelengths. If the data is in vacuum, the emission line wavelengths are converted to vacuum before masking.
 		"""
 		#Dictionary of corrosponding elements to their emission lines
 		emission_dict = {'He-II' : (3202.15, 4685.74),
@@ -103,6 +106,9 @@ class firefly_setup:
 					for n in range(n_lines):
 
 						n_line = line[n]
+						
+						if self.data_wave_medium=='vacuum':
+							n_line = airtovac(n_line)
 
 						#Creates the boolean array
 						temp_lines_mask = ((self.restframe_wavelength > n_line - self.N_angstrom_masked) & (self.restframe_wavelength < n_line + self.N_angstrom_masked))
@@ -110,6 +116,10 @@ class firefly_setup:
 						self.lines_mask = (temp_lines_mask | self.lines_mask)
 						
 				else:
+					
+					if self.data_wave_medium=='vacuum':
+						line = airtovac(line)
+					
 					temp_lines_mask = ((self.restframe_wavelength > line - self.N_angstrom_masked) & (self.restframe_wavelength < line + self.N_angstrom_masked))
 					self.lines_mask = (temp_lines_mask | self.lines_mask)
 

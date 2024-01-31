@@ -854,7 +854,7 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 		Uses the attenuation curves of Calzetti (2000) for starburst galaxies.
 		"""
 		num_laws = SPM.num_dust_vals
-		ebv_arr     = np.arange(num_laws)/(SPM.max_ebv*num_laws*1.0)
+		ebv_arr     = SPM.max_ebv*np.arange(num_laws)/(num_laws - 1)
 		chi_dust    = np.zeros(num_laws)
 		for ei,e in enumerate(ebv_arr):
 			laws = np.array(dust_calzetti_py(e,wave))
@@ -883,7 +883,7 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 		Uses the attenuation curves of Allen (1976) of the Milky Way.
 		"""
 		num_laws = SPM.num_dust_vals
-		ebv_arr     = np.arange(num_laws)/(SPM.max_ebv*num_laws*1.0)
+		ebv_arr     = SPM.max_ebv*np.arange(num_laws)/(num_laws - 1)
 		chi_dust    = np.zeros(num_laws)
 		for ei,e in enumerate(ebv_arr):
 			laws = np.array(dust_allen_py(e,wave))
@@ -901,7 +901,7 @@ def determine_attenuation(wave,data_flux,error_flux,model_flux,SPM,age,metal):
 		Uses the attenuation curves of Prevot (1984) and Bouchert et al. (1985) for the Small Magellanic Cloud (SMC).
 		"""
 		num_laws = SPM.num_dust_vals
-		ebv_arr     = np.arange(num_laws)/(SPM.max_ebv*num_laws*1.0)
+		ebv_arr     = SPM.max_ebv*np.arange(num_laws)/(num_laws - 1)
 		chi_dust    = np.zeros(num_laws)
 		for ei,e in enumerate(ebv_arr):
 			laws = np.array(dust_prevot_py(e,wave))

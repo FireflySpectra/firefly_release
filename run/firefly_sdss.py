@@ -166,7 +166,7 @@ tables = [prihdu]
 #define input object to pass data on to firefly modules and initiate run
 spec=fs.firefly_setup(input_file,milky_way_reddening=milky_way_reddening, \
                                   N_angstrom_masked=N_angstrom_masked,\
-                                  hpf_mode=hpf_mode)
+                                  hpf_mode=hpf_mode,data_wave_medium = data_wave_medium)
 spec.openSingleSpectrum(wavelength, flux, error, redshift, ra, dec, vdisp, emlines, r_instrument)
 
 did_not_converge = 0.
