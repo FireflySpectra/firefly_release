@@ -44,7 +44,7 @@ from firefly_estimations_3d import estimation
 from firefly_dust import hpf, unred, determine_attenuation, dust_calzetti_py
 from firefly_instrument import downgrade
 from firefly_fitter import fitter
-from firefly_library import airtovac, convert_chis_to_probs, light_weights_to_mass, calculate_averages_pdf, normalise_spec, match_data_models
+from firefly_library import airtovac, vactoair, convert_chis_to_probs, light_weights_to_mass, calculate_averages_pdf, normalise_spec, match_data_models
 import matplotlib.pyplot as plt
 
 default_value = -9999
@@ -100,7 +100,7 @@ class StellarPopulationModel:
 		 #. Finally, it writes the output files
 
 	"""
-	def __init__(self, specObs, outputFile, cosmo, models = 'MaStar', model_libs = ['gold'], imfs = ['kr'], hpf_mode = 'on', age_limits = [0,15], downgrade_models = True, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 10, fit_per_iteration_cap = 1000, pdf_sampling = 300, data_wave_medium = 'vacuum', Z_limits = [-3,3], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
+	def __init__(self, specObs, outputFile, cosmo, models = 'MaStar', model_libs = ['gold'], imfs = ['kr'], hpf_mode = 'on', age_limits = [0,15], downgrade_models = True, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 10, fit_per_iteration_cap = 1000, pdf_sampling = 300, data_wave_medium = 'vacuum', fit_wave_medium = 'vacuum', Z_limits = [-3,3], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
 		self.cosmo = cosmo
 		self.specObs = specObs
 		self.outputFile = outputFile
@@ -150,6 +150,7 @@ class StellarPopulationModel:
 		self.pdf_sampling = pdf_sampling
 		# Default is air, unless manga is used
 		self.data_wave_medium = data_wave_medium
+		self.fit_wave_medium = fit_wave_medium
 		self.Z_limits = Z_limits
 		self.wave_limits = wave_limits
 
@@ -381,7 +382,7 @@ class StellarPopulationModel:
 						spectrum = model_table.loc[model_table.Age == a, ['wavelength_model', 'flux_model'] ].values
 						wavelength_int,flux = spectrum[:,0],spectrum[:,1]
 
-						# converts to air wavelength
+						# converts to vacuum wavelength
 						if self.data_wave_medium == 'vacuum':
 							wavelength = airtovac(wavelength_int)
 						else:
@@ -452,7 +453,11 @@ class StellarPopulationModel:
 						continue
 					flux = fluxgrid[ii,jj,sidx,:]
 					
-					# no conversion to vacuum needed, assuming models are in vacuum
+					# converts vacuum to air wavelength
+					if self.data_wave_medium == 'air':
+						wavelength = vactoair(wavelength_int)
+					else:
+						wavelength = wavelength_int
 					
 					# downgrades the model
 					if self.downgrade_models:
@@ -502,6 +507,11 @@ class StellarPopulationModel:
 				#print(len(model_wave_int), len(model_flux_int), len(age), len(metal))
 				wave, data_flux, error_flux, model_flux_raw = match_data_models( self.specObs.restframe_wavelength, self.specObs.flux, self.specObs.bad_flags, self.specObs.error, model_wave_int, model_flux_int, self.wave_limits[0], self.wave_limits[1], saveDowngradedModel = False)
 				#print("model: w,f,fe,fr", len(wave), len(data_flux), len(error_flux), len(model_flux_raw))
+				# Convert wavelengths to the preferred medium to fit the models to the data
+				if self.data_wave_medium == 'air' and self.fit_wave_medium == 'vacuum':
+					wave = airtovac(wave)
+				if self.data_wave_medium == 'vacuum' and self.fit_wave_medium == 'air':	
+					wave = vactoair(wave)
 				self.matched_wave = wave
 				self.matched_model_flux_raw = model_flux_raw
 				# C. normalises the models to the median value of the model [erg/s/A/Msun]
@@ -698,7 +708,10 @@ class StellarPopulationModel:
 				combined_gas_fraction = np.sum(mass_per_ssp - final_ML_totM)
 	
 				# 8. It writes the output file
-				waveCol = pyfits.Column(name="wavelength",format="D", unit="Angstrom", array= wave)
+				if self.fit_wave_medium == 'vacuum':
+					waveCol = pyfits.Column(name="wavelength",format="D", unit="Angstrom (vacuum)", array= wave)
+				else:
+					waveCol = pyfits.Column(name="wavelength",format="D", unit="Angstrom (air)", array= wave)
 				dataCol = pyfits.Column(name="original_data",format="D", unit="1e-17erg/s/cm2/Angstrom", array= data_flux)
 				errorCol = pyfits.Column(name="flux_error",format="D", unit="1e-17erg/s/cm2/Angstrom", array= error_flux)
 				best_fitCol = pyfits.Column(name="firefly_model",format="D", unit="1e-17erg/s/cm2/Angstrom", array= best_fit)
