@@ -96,6 +96,9 @@ Z_limits = [-3.,3.]
 #specify whether data in air or vaccum
 data_wave_medium='vacuum'
 
+#specify whether you would like to fit in air or vacuum wavelengths
+fit_wave_medium='vacuum'
+
 #Firefly assumes flux units of erg/s/A/cm^2.
 #Choose factor in case flux is scaled
 #(e.g. flux_units=10**(-17) for SDSS)
@@ -169,7 +172,7 @@ tables = [prihdu]
 #define input object to pass data on to firefly modules and initiate run
 spec=fs.firefly_setup(input_file,milky_way_reddening=milky_way_reddening, \
                                   N_angstrom_masked=N_angstrom_masked,\
-                                  hpf_mode=hpf_mode)
+                                  hpf_mode=hpf_mode,data_wave_medium = data_wave_medium)
 
 spec.openSingleSpectrum(wavelength, flux, error, redshift, ra, dec, vdisp, emlines, r_instrument)
 
@@ -179,7 +182,7 @@ try :
 	model = fm.StellarPopulationModel(spec, output_file, cosmo, models = model_key, \
                                            model_libs = model_lib, imfs = imfs, \
                                            age_limits = [age_min,age_max], downgrade_models = True, \
-                                           data_wave_medium = data_wave_medium, Z_limits = Z_limits, \
+                                           data_wave_medium = data_wave_medium, fit_wave_medium=fit_wave_medium,Z_limits = Z_limits, \
                                            suffix=suffix, use_downgraded_models = False, \
                                            dust_law=dust_law, max_ebv=max_ebv, num_dust_vals=num_dust_vals, \
                                            dust_smoothing_length=dust_smoothing_length,max_iterations=max_iterations, \

@@ -73,6 +73,37 @@ def airtovac(wave_air):
 
     return wave_vac
 
+def vactoair(wave_vac):
+    """ 
+	Inverse function to airtovac
+    """
+
+    # Copy the data
+    wave_air = wave_vac.astype(np.float64) if hasattr(wave_vac, "__len__") else float(wave_vac)
+    g = wave_vac > 2000.0                           # Only modify above 2000 A
+    Ng = np.sum(g)
+    
+    if Ng > 0:
+        # Handle both arrays and scalars
+        if hasattr(wave_vac, "__len__"):
+            _wave_vac = wave_vac[g].astype(np.float64)
+            _wave_air = wave_air[g]
+        else:
+            _wave_air = float(wave_air)
+            _wave_vac = float(wave_vac)
+
+        for i in range(0,2):
+            sigma2 = np.square(1.0e4/_wave_vac)     #Convert to wavenumber squared
+            fact = 1.0 + 5.792105e-2/(238.0185 - sigma2) + 1.67917e-3/(57.362 - sigma2)
+            _wave_air = _wave_vac/fact
+
+        if hasattr(wave_vac, "__len__"):        # Save the result
+            wave_air[g] = _wave_air
+        else:
+            wave_air = _wave_air
+
+    return wave_air
+
 #-----------------------------------------------------------------------
 def bisect_array(array):
 	"""

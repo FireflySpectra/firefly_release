@@ -15,6 +15,7 @@ In this newest version we inlcuded a number of bug fixes and updates as document
 We are delighted you use our code! If you use our code, please cite the following papers:
 
 * [Wilkinson et al. 2017](http://adsabs.harvard.edu/abs/2017MNRAS.472.4297W) for the code, its description and testing.
+* [Neumann et al. 2022](https://ui.adsabs.harvard.edu/abs/2022MNRAS.513.5988N) for updates to version 1.0.1, the description of the SDSS-IV/MaNGA DR17 run and testing of the code performance.
 * [Comparat et al. 2018](https://arxiv.org/abs/1711.06575) for description of the SDSS-IV DR14 run and testing of the code performance.
 * [Goddard et al. 2017](https://ui.adsabs.harvard.edu/abs/2017MNRAS.466.4731G) for description of the SDSS-IV/MANGA run and testing of the code performance.
 * [Maraston & Stromback 2011](http://adsabs.harvard.edu/abs/2011MNRAS.418.2785M) for the M11 stellar population models.
