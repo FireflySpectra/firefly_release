@@ -435,7 +435,7 @@ class StellarPopulationModel:
 			#wavelength=hdul[2].data
 
 
-			wavelength=hdul[2].data[0,:]
+			wavelength_int=hdul[2].data[0,:]
 
 			if (lib=='gold'):
 				fluxgrid=hdul[3].data
