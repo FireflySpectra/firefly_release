@@ -410,10 +410,6 @@ class StellarPopulationModel:
 			#print(wavelength)
 			#stop
 			
-			print(wavelength)
-			print(model_flux)
-			print(age_model)
-			print(metal_model)
 
 			# print "Retrieved all models!"
 			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
@@ -482,12 +478,7 @@ class StellarPopulationModel:
 					
 					age_model.append(age)
 					metal_model.append(10**metal)
-					
-			print(wavelength)
-			print(model_flux)
-			print(age_model)
-			print(metal_model)
-					
+							
 			#print("Retrieved all models!")
 			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
 			return wavelength, model_flux, age_model, metal_model
