@@ -100,7 +100,7 @@ class StellarPopulationModel:
 		 #. Finally, it writes the output files
 
 	"""
-	def __init__(self, specObs, outputFile, cosmo, models = 'E-MILES', model_libs = ['gold'], imfs = ['kr'], hpf_mode = 'on', age_limits = [0,15], downgrade_models = True, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 10, fit_per_iteration_cap = 1000, pdf_sampling = 300, data_wave_medium = 'vacuum', fit_wave_medium = 'vacuum', Z_limits = [-3,3], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
+	def __init__(self, specObs, outputFile, cosmo, models = 'E-MILES', model_libs = ['gold'], imfs = ['kr'], hpf_mode = 'on', age_limits = [0,15], downgrade_models = False, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 2, fit_per_iteration_cap = 1000, pdf_sampling = 300, data_wave_medium = 'vacuum', fit_wave_medium = 'vacuum', Z_limits = [-3,3], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
 		self.cosmo = cosmo
 		self.specObs = specObs
 		self.outputFile = outputFile
