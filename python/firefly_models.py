@@ -100,7 +100,7 @@ class StellarPopulationModel:
 		 #. Finally, it writes the output files
 
 	"""
-	def __init__(self, specObs, outputFile, cosmo, models = 'MaStar', model_libs = ['gold'], imfs = ['kr'], hpf_mode = 'on', age_limits = [0,15], downgrade_models = True, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 10, fit_per_iteration_cap = 1000, pdf_sampling = 300, data_wave_medium = 'vacuum', fit_wave_medium = 'vacuum', Z_limits = [-3,3], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
+	def __init__(self, specObs, outputFile, cosmo, models = 'E-MILES', model_libs = ['gold'], imfs = ['kr'], hpf_mode = 'on', age_limits = [0,15], downgrade_models = True, dust_law = 'calzetti', max_ebv = 1.5, num_dust_vals = 200, dust_smoothing_length = 200, max_iterations = 10, fit_per_iteration_cap = 1000, pdf_sampling = 300, data_wave_medium = 'vacuum', fit_wave_medium = 'vacuum', Z_limits = [-3,3], wave_limits = [0,99999990], suffix = "",use_downgraded_models = False, write_results=True, flux_units=10**-17):
 		self.cosmo = cosmo
 		self.specObs = specObs
 		self.outputFile = outputFile
@@ -132,6 +132,10 @@ class StellarPopulationModel:
 			r_model=hdul[2].data[1,:]
 			# This provides R=lamba/delta_lambda as numpy ndarray. The params deltal_libs and deltal should probably be renamed. 
 			self.deltal_libs.append(r_model)
+			
+			
+		elif self.models =='E-MILES':
+			self.deltal_libs.append(0.9)
 			
 		# sets the Initial mass function
 		self.imfs = imfs
@@ -371,7 +375,6 @@ class StellarPopulationModel:
 				# print "Retrieving and downgrading models for "+z
 				model_table = pd.read_table(z,converters={'Age':np.float64}, header=None ,usecols=[0,2,3], names=['Age','wavelength_model','flux_model'], delim_whitespace=True)
 				age_data = np.unique(model_table['Age'].values.ravel())
-#				print(age_data)
 #				stop
 				for a in age_data:
 					logyrs_a = trylog10(a)+9.0
@@ -406,6 +409,7 @@ class StellarPopulationModel:
 						first_model = False
 			#print(wavelength)
 			#stop
+			
 
 			# print "Retrieved all models!"
 			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
@@ -435,7 +439,7 @@ class StellarPopulationModel:
 			#wavelength=hdul[2].data
 
 
-			wavelength=hdul[2].data[0,:]
+			wavelength_int=hdul[2].data[0,:]
 
 			if (lib=='gold'):
 				fluxgrid=hdul[3].data
@@ -474,13 +478,111 @@ class StellarPopulationModel:
 					
 					age_model.append(age)
 					metal_model.append(10**metal)
-					
+							
 			#print("Retrieved all models!")
 			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
 			return wavelength, model_flux, age_model, metal_model
+			
+			
+			
+		elif self.models =='E-MILES':
 		
-		
+			model_path = join(os.environ['STELLARPOPMODELS_DIR'],'EMILES_SSP','Eku1.30')
+			
+			
+			lib = model_used
+			if imf_used == 'kr':
+				slope = 1.3
+			else:
+				print('Unrecognised IMF. Please choose between kr and ss')
+				sys.exit()
+				
+				
+			all_metal_files = sorted(glob.glob(model_path+'*'))
+			
+			metal_files = []
+			metal = [] 
+			for z in range(len(all_metal_files)):
+				zchar = all_metal_files[z][len(model_path):-28]	
+				if zchar == 'Zm0.25':
+					znum = 10**(-0.25)
+					
+				elif zchar == 'Zm0.35':
+					znum = 10**(-0.35)
+					
+				elif zchar == 'Zm0.66':
+					znum = 10**(-0.66)
+					
+				elif zchar == 'Zm0.96':
+					znum = 10**(-0.96)
+					
+				elif zchar == 'Zm1.26':
+					znum = 10**(-1.26)
+					
+				elif zchar == 'Zp0.06':
+					znum = 10**(0.06)
+					
+				elif zchar == 'Zp0.15':
+					znum = 10**(0.15)
+					
+				elif zchar == 'Zp0.26':
+					znum = 10**(0.26)
+						
+				else:
+					raise NameError('Unrecognised metallicity! Check model file names.')
+					
+					
+				if znum>10**(self.Z_limits[0]) and znum<10**(self.Z_limits[1]):
+					metal_files.append(all_metal_files[z])
+					metal.append(znum)
+					
 
+			model_flux, age_model, metal_model = [],[],[]
+			
+			for i in metal_files:
+				ages = i[91:96]
+				ages = float(ages)
+				age_model.append(ages)
+				
+				hdul=pyfits.open(i)
+				wavelength_int = np.arange(1680, 50000, 0.9)
+				flux = hdul[0].data
+			
+			
+				# converts to vacuum wavelength
+				if self.data_wave_medium == 'vacuum':
+					wavelength = airtovac(wavelength_int)
+				else:
+					wavelength = wavelength_int
+
+				# downgrades the model
+				if self.downgrade_models:
+					mf = downgrade(wavelength,flux,deltal,self.specObs.vdisp, wave_instrument, r_instrument)
+				else:
+					mf = copy.copy(flux)
+
+				# Reddens the models
+				if ebv_mw != 0:
+					attenuations = unred(wavelength,ebv=0.0-ebv_mw)
+					model_flux.append(mf*attenuations)
+				else:
+					model_flux.append(mf)
+				
+			metal_model = metal
+			
+			
+			#print(wavelength)
+			#print(model_flux)
+			#print(age_model)
+			#print(metal_model)
+			
+				
+			self.model_wavelength, self.model_flux, self.age_model, self.metal_model = wavelength, model_flux, age_model, metal_model
+			return wavelength, model_flux, age_model, metal_model
+			
+			
+			
+			
 	def fit_models_to_data(self):
 		"""
 		Once the data and models are loaded, then execute this function to find the best model. It loops overs the models to be fitted on the data:
