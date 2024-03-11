@@ -540,7 +540,9 @@ class StellarPopulationModel:
 			model_flux, age_model, metal_model = [],[],[]
 			
 			for i in metal_files:
-				ages = i[91:96]
+				split_word = 'EMILES_SSP/'
+				model_id = i.split(split_word)[1]
+				ages = model_id[14:19]
 				ages = float(ages)
 				age_model.append(ages)
 				
